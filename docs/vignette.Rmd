@@ -1,0 +1,27 @@
+---
+title: "BayesANT tutorial"
+author: "Alessandro Zito"
+date: "1/15/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{r}
+data <- read.BayesANT.data(fasta.file = "../FinBOL_SplitSeq_test.gzip")
+model <- BayesANT(data = data, type_location = 'pairs')
+
+document()
+
+out <- predict(model, DNA = data$DNA[1:100])
+
+out
+
+model <- BayesANT(data = data, typeseq = "not aligned")
+
+```
+

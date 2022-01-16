@@ -1,11 +1,20 @@
 Package: BayesANT
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Bayesian Nonparametric Taxonomic classifier
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Author: Alessandro Zito
+Maintainer: The package maintainer <alessandro.zito@duke.edu>
+Description: BayesANT is a package for the taxonomic classification (eg. Phylum, Class, Order, ...)
+    of DNA sequences. It trains a taxonomic classifier on a dataset of barcodes and 
+    returns probabilistic predictions for query DNA sequences
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
+RoxygenNote: 7.1.2
+Imports: magrittr, stringr, Rcpp (>= 1.0.5), RcppArmadillo(>= 0.10.1.2.0), seqinr, knitr, gtools, 
+          kmer, dplyr, purrr, ggplot2, readr, progress, doParallel, foreach
+LinkingTo: Rcpp, RcppArmadillo
+Suggests: rmarkdown
+VignetteBuilder: knitr
+Depends: 
+    R (>= 4.0)
