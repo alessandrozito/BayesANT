@@ -14,7 +14,7 @@
 #' @return
 #' @importFrom foreach %dopar% foreach
 #' @export
-predict.BayesANT <- function(x, DNA, rho = 0.1, return_probs = FALSE, n_top_taxa = 5, cores = 1, verbose = TRUE, ...){
+predict.BayesANT <- function(x, DNA, rho = 0.1, return_probs = FALSE, n_top_taxa = 5, cores = 1, verbose = TRUE, ...) {
 
   ## Register the number of cores in DoParallel.
   ## Default is cores = 1, which is equivalent to a standard for loop
@@ -23,68 +23,68 @@ predict.BayesANT <- function(x, DNA, rho = 0.1, return_probs = FALSE, n_top_taxa
   ## Monitor the output
   seq_indexes <- c(1:length(DNA))
   tot <- length(DNA)
-  if(tot >= 10){
-    verbose_step <- round(tot/10)
+  if (tot >= 10) {
+    verbose_step <- round(tot / 10)
   } else {
     verbose_step <- 9
   }
 
 
   ## Begin prediction
-  if(x$typeseq=="aligned"){
+  if (x$typeseq == "aligned") {
     # Verify that the length of the DNA is equal to the length of the training sequences
     length_DNA <- unique(stringr::str_length(DNA))
-    if(length(length_DNA) != 1){
+    if (length(length_DNA) != 1) {
       stop("Query DNA sequences of different lengths are not allowed when typeseq = 'aligned' in the model.")
     }
-    if(length_DNA != x$sequences_length){
+    if (length_DNA != x$sequences_length) {
       stop(cat("Query DNA sequences must be of length equal to ", x$sequences_length, "base pairs. \n"))
     }
 
 
     out <- foreach(i = seq_indexes) %dopar% {
 
-        ##  Print option valid only for cores = 1
-      if(i %% verbose_step == 0 & verbose == TRUE){
-        cat("Number of sequences predicted = ", i , "/", tot , " \n")
+      ##  Print option valid only for cores = 1
+      if (i %% verbose_step == 0 & verbose == TRUE) {
+        cat("Number of sequences predicted = ", i, "/", tot, " \n")
       }
-        predict_Taxonomy_aligned(DNA[i], rho = rho,
-                                 ParameterMatrix =x$ParameterMatrix,
-                                 Priorprobs = x$Priorprobs,
-                                 type_location = x$type_location,
-                                 nucl = x$nucl,
-                                 return_probs = return_probs,
-                                 n_top_taxa = n_top_taxa)
+      predict_Taxonomy_aligned(DNA[i],
+        rho = rho,
+        ParameterMatrix = x$ParameterMatrix,
+        Priorprobs = x$Priorprobs,
+        type_location = x$type_location,
+        nucl = x$nucl,
+        return_probs = return_probs,
+        n_top_taxa = n_top_taxa
+      )
     }
-
-
-  } else if(x$typeseq=="not aligned"){
+  } else if (x$typeseq == "not aligned") {
     out <- foreach(i = seq_indexes) %dopar% {
 
       ##  Print option valid only for cores = 1
-      if(i %% verbose_step == 0 & verbose == TRUE){
-        cat("Number of sequences predicted = ", i , "/", tot , " \n")
+      if (i %% verbose_step == 0 & verbose == TRUE) {
+        cat("Number of sequences predicted = ", i, "/", tot, " \n")
       }
       predict_Taxonomy_not_alinged(DNA[i],
-                                   k = x$kmers,
-                                   rho = rho,
-                                   ParameterMatrix =  x$ParameterMatrix,
-                                   Priorprobs = x$Priorprobs,
-                                   adjust_Kmer_length = x$adjust_Kmer_length,
-                                   return_probs = return_probs,
-                                   n_top_taxa = n_top_taxa,
-                                   nucl = x$nucl)
+        k = x$kmers,
+        rho = rho,
+        ParameterMatrix = x$ParameterMatrix,
+        Priorprobs = x$Priorprobs,
+        adjust_Kmer_length = x$adjust_Kmer_length,
+        return_probs = return_probs,
+        n_top_taxa = n_top_taxa,
+        nucl = x$nucl
+      )
     }
-
-
   }
 
 
   ##### Reformat the output
-  if(return_probs == T){
+  if (return_probs == T) {
     ## Create a separate data with the results, and a list containing the tor_n predictions
     df_results <- data.frame(do.call("rbind", lapply(out, function(x) x$prediction)))
     top_n_probs <- lapply(out, function(x) x$n_top_taxa)
+    names(top_n_probs) <- names(DNA)
   } else {
     df_results <- data.frame(do.call("rbind", out))
   }
@@ -93,29 +93,12 @@ predict.BayesANT <- function(x, DNA, rho = 0.1, return_probs = FALSE, n_top_taxa
   levels <- model$level_names
   colnames(df_results) <- c(levels, paste0("Prob_", levels))
   prob_cols <- which(grepl("Prob_", colnames(df_results)))
-  df_results[,prob_cols] <- sapply(df_results[,prob_cols],as.numeric)
+  df_results[, prob_cols] <- sapply(df_results[, prob_cols], as.numeric)
+  rownames(df_results) <- names(DNA)
 
-  if(return_probs == T){
+  if (return_probs == T) {
     return(list("prediction" = df_results, "top_n_probs" = top_n_probs))
   } else {
     return(df_results)
   }
-
 }
-
-
-
-test_model <- function(model,rho = 1, DNA, cores = 24, adjust_Kmer_length = FALSE, cols_to_drop = NULL){
-  doParallel::registerDoParallel(cores)
-  p_list <- foreach(i = 1:length(DNA), .combine = "rbind") %dopar%{
-    predict(x = model,rho = rho, s = DNA[i], adjust_Kmer_length = adjust_Kmer_length,cols_to_drop = cols_to_drop)
-  }
-  #df_results <- data.frame(do.call("rbind", p_list))
-  df_results <- data.frame(p_list)
-
-  return(df_results)
-}
-
-
-
-

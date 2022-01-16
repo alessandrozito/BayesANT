@@ -26,10 +26,3 @@ An object of class \code{c("data.frame", "BayesANT.data")}
 \description{
 Function to import DNA sequences data in the format required by \code{BayesANT}
 }
-\examples{
-
-rank <- 6
-rank_names <- c("Phylum", "Class", "Order", "Family", "Genus", "Species")
-data <- read.BayesANT.data("sequences.fasta", rank = rank, rank_names = rank_names)
-
-}

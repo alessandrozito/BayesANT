@@ -2,7 +2,10 @@
 
 S3method(predict,BayesANT)
 export(BayesANT)
+export(add_novelty_to_test_data)
+export(plot_accuracies)
 export(read.BayesANT.data)
+export(read.BayesANT.testDNA)
 import(ggplot2)
 importFrom(Rcpp,sourceCpp)
 importFrom(dplyr,"%>%")

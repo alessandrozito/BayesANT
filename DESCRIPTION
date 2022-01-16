@@ -4,9 +4,7 @@ Title: Bayesian Nonparametric Taxonomic classifier
 Version: 0.1.0
 Author: Alessandro Zito
 Maintainer: The package maintainer <alessandro.zito@duke.edu>
-Description: BayesANT is a package for the taxonomic classification (eg. Phylum, Class, Order, ...)
-    of DNA sequences. It trains a taxonomic classifier on a dataset of barcodes and 
-    returns probabilistic predictions for query DNA sequences
+Description: BayesANT is a package for the taxonomic classification (eg. Phylum, Class, Order, ...) of DNA sequences. It trains a taxonomic classifier on a dataset of barcodes and returns probabilistic predictions for query DNA sequences
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true

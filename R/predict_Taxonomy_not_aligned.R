@@ -1,6 +1,6 @@
 #### Make the prediction
 predict_Taxonomy_not_alinged <- function(s, k, rho, ParameterMatrix, Priorprobs,
-                                          adjust_Kmer_length, nucl, return_probs, n_top_taxa) {
+                                         adjust_Kmer_length, nucl, return_probs, n_top_taxa) {
   final_pred <- data.frame()
 
   # Extract the sequence
@@ -8,13 +8,13 @@ predict_Taxonomy_not_alinged <- function(s, k, rho, ParameterMatrix, Priorprobs,
   s[!s %in% nucl] <- "-"
 
   # Extract the Kmers relative to the sequence
-  Kmers <- kmer::kcount(x= ape::as.DNAbin(s), k = k)
+  Kmers <- kmer::kcount(x = ape::as.DNAbin(s), k = k)
   n_kmers <- ncol(Kmers)
 
   # Adjust the weights
-  if(adjust_Kmer_length == TRUE){
-    weight_seq <- floor(length(s[s!="-"])/k)/(length(s[s!="-"]) - k + 1)
-    Kmers <- Kmers*weight_seq
+  if (adjust_Kmer_length == TRUE) {
+    weight_seq <- floor(length(s[s != "-"]) / k) / (length(s[s != "-"]) - k + 1)
+    Kmers <- Kmers * weight_seq
   } else {
     weight_seq <- 1
   }
@@ -27,17 +27,16 @@ predict_Taxonomy_not_alinged <- function(s, k, rho, ParameterMatrix, Priorprobs,
   # Obtain the prediction
   out <- obtain_prediction(Priorprobs)
 
-  if(return_probs == FALSE){
+  if (return_probs == FALSE) {
     return(out)
   } else {
-    depth = (ncol(Priorprobs) - 2)/2
-    data_probs <- Priorprobs[,1:depth] %>%
+    depth <- (ncol(Priorprobs) - 2) / 2
+    data_probs <- Priorprobs[, 1:depth] %>%
       dplyr::mutate(leaf_prob = predProbs) %>%
       dplyr::arrange(desc(leaf_prob))
-    return(list("prediction" = out,
-                "n_top_taxa" = head(data_probs, n_top_taxa)))
+    return(list(
+      "prediction" = out,
+      "n_top_taxa" = head(data_probs, n_top_taxa)
+    ))
   }
-
 }
-
-

@@ -13,15 +13,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 data <- read.BayesANT.data(fasta.file = "../FinBOL_SplitSeq_test.gzip")
-model <- BayesANT(data = data, type_location = 'pairs')
+model <- BayesANT(data = data)
 
 document()
-
-out <- predict(model, DNA = data$DNA[1:100])
-
-out
-
-model <- BayesANT(data = data, typeseq = "not aligned")
+testDNA <- read.BayesANT.testDNA(fasta.file = "../FinBOL_SplitSeq_test.gzip")
+out <- predict(model, DNA = testDNA[1:20], return_probs = T)
 
 ```
 

@@ -13,14 +13,7 @@
 #'
 #' @return An object of class \code{c("data.frame", "BayesANT.data")}
 #' @export
-#'
-#' @examples
-#'
-#' rank <- 6
-#' rank_names <- c("Phylum", "Class", "Order", "Family", "Genus", "Species")
-#' data <- read.BayesANT.data("sequences.fasta", rank = rank, rank_names = rank_names)
-#'
-read.BayesANT.data <- function(fasta.file, rank = NULL, rank_names = NULL){
+read.BayesANT.data <- function(fasta.file, rank = NULL, rank_names = NULL) {
 
   ## Step 1 - Load the data in fasta format with DNA sequences.
   ## The automatic format in which they are loaded is a named list where DNA sequences are
@@ -41,26 +34,25 @@ read.BayesANT.data <- function(fasta.file, rank = NULL, rank_names = NULL){
   taxa <- taxa[, -1]
 
   # Restrict to the rank desired
-  if(is.null(rank)){
+  if (is.null(rank)) {
     ## Automatically select the lowest rank, which is the maximum length for the annotations.
     lv <- ncol(taxa)
   } else {
     lv <- rank
-    if(rank > ncol(taxa)){
+    if (rank > ncol(taxa)) {
       stop(cat("Value for rank = ", rank, "exceeds the length for the taxonomic annotations in the library. Specify a value for rank lower or equal to ", ncol(taxa)))
     }
   }
   taxa <- taxa[, 1:lv]
 
   # Specify the rank names
-  if(is.null(rank_names)){
+  if (is.null(rank_names)) {
     rank_names <- paste0("Level", c(1:lv))
   }
   colnames(taxa) <- rank_names[1:lv]
 
   # Step 3 - Create the BayesANT library
   data <- data.frame(cbind(taxa, "DNA" = unlist(lapply(data_fasta, function(x) stringr::str_to_upper(x)))))
-  class(data) <- c("data.frame","BayesANT.data")
+  class(data) <- c("data.frame", "BayesANT.data")
   return(data)
 }
-
