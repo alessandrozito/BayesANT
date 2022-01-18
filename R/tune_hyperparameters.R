@@ -1,11 +1,3 @@
-##### Method of moments tuning
-
-#' Extract the proportions of the given Nucleotide counts
-#'
-#' @param Nucl_counts nulcelotide counts list
-#' @param eps small tweak for the zero counts
-#'
-#' @return
 get_proportions <- function(Nucl_counts, eps = 0, verbose = FALSE) {
   Proportions <- vector("list", length = ncol(Nucl_counts[[1]]))
 
@@ -34,7 +26,7 @@ get_proportions <- function(Nucl_counts, eps = 0, verbose = FALSE) {
       tot <- tot + verbose_step
     }
   }
-  if (verbose) {
+  if (verbose & length(Proportions) - tot > 0) {
     pb$tick(length(Proportions) - tot)
   }
   return(Proportions)
@@ -129,7 +121,7 @@ tune_hyperparameters <- function(tree, Nucl_counts, mixture_weight = NULL, verbo
       tot <- tot + verbose_step
     }
   }
-  if (verbose == T) {
+  if (verbose & length(higher_cl) - tot > 0) {
     pb$tick(length(higher_cl) - tot)
   }
   return(hyperpriors)

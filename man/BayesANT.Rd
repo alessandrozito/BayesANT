@@ -2,7 +2,7 @@
 % Please edit documentation in R/BayesANT.R
 \name{BayesANT}
 \alias{BayesANT}
-\title{Call the BayesANT Classifier.}
+\title{Call to the BayesANT Classifier.}
 \usage{
 BayesANT(
   data,
@@ -40,5 +40,5 @@ Options are \code{'single'}, which refers to the single-location multinomial ker
 An object of class \code{BayesANT}
 }
 \description{
-Call the BayesANT Classifier.
+Call to the BayesANT Classifier.
 }

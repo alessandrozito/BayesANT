@@ -38,7 +38,7 @@ get_nucleotide_counts <- function(nodes, DNAseq, nucl, verbose = F) {
       tot <- tot + pb_step
     }
   }
-  if (verbose) {
+  if (verbose & length(unique_nodes) - tot > 0) {
     pb$tick(length(unique_nodes) - tot)
   }
 

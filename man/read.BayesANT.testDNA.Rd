@@ -2,7 +2,7 @@
 % Please edit documentation in R/read.BayesANT.testDNA.R
 \name{read.BayesANT.testDNA}
 \alias{read.BayesANT.testDNA}
-\title{Load query DNA sequences accepted by the function \code{predict.BayesANT}}
+\title{Load query DNA sequences to be used by the function \code{predict.BayesANT}}
 \usage{
 read.BayesANT.testDNA(fasta.file)
 }
@@ -13,5 +13,5 @@ read.BayesANT.testDNA(fasta.file)
 A named vector of strings
 }
 \description{
-Load query DNA sequences accepted by the function \code{predict.BayesANT}
+Load query DNA sequences to be used by the function \code{predict.BayesANT}
 }

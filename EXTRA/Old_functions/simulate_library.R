@@ -130,7 +130,7 @@ simulate_library <- function(size, n_levels, alphas, sigmas, length_seq,
 
     # Unlist the counts and add to the node level
     counts <- unlist(counts)
-    node_names <- rep(paste0("Sp", l, "-", c(1:nrow(sequence))), counts)
+    node_names <- rep(paste0("V*-", c(1:nrow(sequence)), ",", l), counts)
     ref_seq[, l] <- node_names
 
   }

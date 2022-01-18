@@ -1,23 +1,49 @@
 ---
-title: "BayesANT tutorial"
-author: "Alessandro Zito"
-date: "1/15/2022"
-output: html_document
+title: "A tutorial on BayesANT"
+subtitle: "Bayesian nonparametric taxonomic classifier for DNA barcoding sequences"
+author: 
+  - Alessandro Zito^[Duke University, alessandro.zito@duke.edu]
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+bibliography: BayesANT_lib.bib
+css: style.css
+output: rmdformats::readthedown
 ---
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(BayesANT)
 ```
 
-## R Markdown
 
+# Introduction 
+
+[`BayesANT`](https://github.com/alessandrozito/BayesANT) is an R package that runs the Bayesian nonparametric taxonomic classifier desscribed in @Zito2022_BayesANT The code is available at this [github repository](https://github.com/alessandrozito/BayesANT).
+
+## Installation
+
+```{r, eval = FALSE}
+# If the devtools R package is not already installed
+# install.packages("devtools")
+devtools::install_github("alessandrozito/BayesANT")
+library(BayesANT)
+```
+
+
+## Package description
 ```{r}
-data <- read.BayesANT.data(fasta.file = "../FinBOL_SplitSeq_test.gzip")
-model <- BayesANT(data = data)
-
-document()
-testDNA <- read.BayesANT.testDNA(fasta.file = "../FinBOL_SplitSeq_test.gzip")
-out <- predict(model, DNA = testDNA[1:20], return_probs = T)
-
+file.train <- system.file("data/trainDNA.fasta", package = "BayesANT")
+file.test <- system.file("data/testDNA.fasta", package = "BayesANT")
 ```
+
+
+
+
+![Example of a Pitman--Yor process with $n= 19$, $\alpha = 1$, $\sigma = 0.25$ and $K_n=4$. Taxa names are reported on top of the circles, and frequency of appearance are written on the right to the blue DNA sequences, respectively. Fractions in black denote the taxon probabilities for the orange DNA sequence. For example, the probability of observing the butterfly-shaped taxon $V_1^*$ is $(n_1 - \sigma)/(\alpha+n) = (10 - 0.25)/(19 + 1) = 39/80$. The probability for the unknown question mark taxon is $(\alpha + \sigma k)/(\alpha+n) = (1 + 4\times0.25)/(19 + 1) = 1/10$.](Pitman_Yor_UrnScheme.png){#id .class width=70% height=70%}
+
+
+![<left> Example of a three-level taxonomic library. The total sample size of this example is $n =28$. Circles in blue indicate nodes linked to leafs with observed DNA sequences, while circles in gray show all the possible missing or undiscovered branches. <left>](Taxonomic_tree.png)
+
+
+
+
+
 

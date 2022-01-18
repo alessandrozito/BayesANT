@@ -23,7 +23,7 @@ logEPPF_PY_pooled <- function(alpha, sigma, freq_list) {
 
 max_EPPF_PY <- function(frequencies) {
   start <- c(1, 0.5) # Initialization of the maximization algorithm
-  out <- nlminb(
+  out <- stats::nlminb(
     start = start,
     function(param) -logEPPF_PY(alpha = param[1], sigma = param[2], frequencies = frequencies),
     lower = c(-Inf, 1e-16), upper = c(Inf, 1 - 1e-10)
@@ -33,7 +33,7 @@ max_EPPF_PY <- function(frequencies) {
 
 max_EPPF_PY_pooled <- function(freq_list) {
   start <- c(1, 0.5) # Initialization of the maximization algorithm
-  out <- nlminb(
+  out <- stats::nlminb(
     start = start,
     function(param) -logEPPF_PY_pooled(alpha = param[1], sigma = param[2], freq_list = freq_list),
     lower = c(-Inf, 1e-16), upper = c(Inf, 1 - 1e-10)
@@ -55,11 +55,7 @@ fitPY <- function(freq) {
   }
 }
 
-#' Fit the Pitman-Yor parameters
-#'
-#' @param tree A tree that comes out of the simulate_tree
-#'
-#' @return
+
 fitPY_tree <- function(tree) {
   # Assume that the last column contains the sequences
   PYpars <- vector(mode = "list", length = ncol(tree) - 1)

@@ -1,8 +1,8 @@
 plot_similarity <- function(DNA, seqtype = "aligned", kmers = 5, min_score = 0, taxa_to_plot = NULL, colors = c("#2960F5", "#BDEAF5")){
   dnabin = ape::as.DNAbin(x = stringr::str_split(DNA, ""))
-  if(type == "aligned"){
+  if(seqtype == "aligned"){
     M =  1 - ape::dist.dna(x = dnabin, model = "raw", as.matrix = TRUE)
-  } else if (type == "not aligned"){
+  } else if (seqtype == "not aligned"){
     M = 1 - as.matrix(kdistance(x = dnabin, k = kmers))
     rownames(M) <- colnames(M) <- 1:ncol(M)
     #M<- t(apply(M, 2, rev))

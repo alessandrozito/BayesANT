@@ -77,10 +77,10 @@ get_Priorprobs_PY <- function(data, PYpars) {
   return(Priorprobs)
 }
 
-get_Priorprobs_noNewSpecies <- function(ref_seq, PYpars) {
-  ref_seq <- ref_seq[, -ncol(ref_seq)]
-  column_names <- colnames(ref_seq)
-  Priorprobs <- dplyr::distinct(ref_seq)
+get_Priorprobs_noNewSpecies <- function(data, PYpars) {
+  data <- data[, -ncol(data)]
+  column_names <- colnames(data)
+  Priorprobs <- dplyr::distinct(data.frame(data))
 
   ##### NOW, compute the prior probabilities
 

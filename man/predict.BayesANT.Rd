@@ -5,7 +5,7 @@
 \title{Predict the taxonomic annotation for query DNA sequences via a BayesANT model.}
 \usage{
 \method{predict}{BayesANT}(
-  x,
+  object,
   DNA,
   rho = 0.1,
   return_probs = FALSE,
@@ -16,9 +16,9 @@
 )
 }
 \arguments{
-\item{x}{an object of class \code{BayesANT}}
+\item{object}{an object of class \code{BayesANT}}
 
-\item{DNA}{DNA sequence to predict.}
+\item{DNA}{DNA sequence to predict. Consider loading it with the function \code{read.BayesANT.testDNA}}
 
 \item{rho}{Temperature parameter to re-calibrate the leaf probabilities. Default set to \code{rho = 0.1}.}
 
@@ -35,7 +35,7 @@ Default is \code{cores = 1}, which corresponds to a standard \code{for} loop.}
 \item{...}{Additional parameters}
 }
 \value{
-
+An object of class \code{data.frame} or \code{list}
 }
 \description{
 Predict the taxonomic annotation for query DNA sequences via a BayesANT model.

@@ -28,12 +28,13 @@ predict_Taxonomy_aligned <- function(s, rho, ParameterMatrix, Priorprobs, nucl,
     return(out)
   } else {
     depth <- (ncol(Priorprobs) - 2) / 2
-    data_probs <- Priorprobs[, 1:depth] %>%
-      dplyr::mutate(leaf_prob = predicted_probs) %>%
-      dplyr::arrange(desc(leaf_prob))
+    data_probs <- Priorprobs[, 1:depth]
+    data_probs$leaf_prob <- predicted_probs
+    data_probs <- data_probs[order(data_probs$leaf_prob)]
+
     return(list(
       "prediction" = out,
-      "n_top_taxa" = head(data_probs, n_top_taxa)
+      "n_top_taxa" = utils::head(data_probs, n_top_taxa)
     ))
   }
 }

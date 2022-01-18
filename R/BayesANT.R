@@ -1,4 +1,4 @@
-#' Call the BayesANT Classifier.
+#' Call to the BayesANT Classifier.
 #'
 #' @param data An object of class \code{c('data.frame', 'BayesANT.data')}. Needs to be loaded with the function \code{read.BayesANT.data}.
 #' @param typeseq Type of sequences used to train the classifier. Options are \code{'not aligned'} and \code{'aligned'}. Default is \code{typeseq = 'aligned'}
@@ -36,7 +36,7 @@ BayesANT <- function(data,
 
   # Exclude the observations with missing values.
   # We store the index of the incomplete cases if one is interested in clustering
-  missing_taxa <- !complete.cases(data)
+  missing_taxa <- !stats::complete.cases(data)
   data_missing <- data[missing_taxa, ]
   # Restrict to the fully annotated sequences
   data <- data[!missing_taxa, ]

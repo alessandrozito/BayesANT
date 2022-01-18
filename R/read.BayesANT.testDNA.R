@@ -1,4 +1,4 @@
-#' Load query DNA sequences accepted by the function \code{predict.BayesANT}
+#' Load query DNA sequences to be used by the function \code{predict.BayesANT}
 #'
 #' @param fasta.file File in \code{.fasta} or \code{.fas} format containing the DNA sequences.
 #'

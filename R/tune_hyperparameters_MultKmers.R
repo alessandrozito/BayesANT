@@ -80,7 +80,7 @@ tune_hyperparameters_MultKmers <- function(tree, Kmer_counts, verbose = FALSE) {
       tot <- tot + verbose_step
     }
   }
-  if (verbose == T) {
+  if (verbose & length(higher_cl) - tot > 0) {
     pb$tick(length(higher_cl) - tot)
   }
   return(hyperpriors)
