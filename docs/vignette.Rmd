@@ -1,5 +1,5 @@
 ---
-title: "A tutorial on BayesANT"
+title: "A tutorial of BayesANT"
 subtitle: "Bayesian nonparametric taxonomic classifier for DNA barcoding sequences"
 author: 
   - Alessandro Zito^[Duke University, alessandro.zito@duke.edu]
@@ -16,10 +16,7 @@ library(BayesANT)
 
 # Introduction 
 
-[`BayesANT`](https://github.com/alessandrozito/BayesANT) is an R package that runs the Bayesian nonparametric taxonomic classifier desscribed in @Zito2022_BayesANT The code is available at this [github repository](https://github.com/alessandrozito/BayesANT).
-
 ## Installation
-
 ```{r, eval = FALSE}
 # If the devtools R package is not already installed
 # install.packages("devtools")
@@ -27,22 +24,216 @@ devtools::install_github("alessandrozito/BayesANT")
 library(BayesANT)
 ```
 
-
 ## Package description
+[`BayesANT`](https://github.com/alessandrozito/BayesANT) is an R package that runs the Bayesian nonparametric taxonomic classifier described in @Zito2022_BayesANT The code is available at this [github repository](https://github.com/alessandrozito/BayesANT).
+In this tutorial we provide an overview of the functions in the package, and we briefly describe the algorithm. For explicit mathematical details and estimation method, see the Supplementary matherial in @Zito2022_BayesANT. 
+
+The package is structured around two core methods:
+
+- The method `BayesANT`, which trains the taxonomic classifier for a set of annotated DNA sequences. We endow it with a `summary.BayesANT` method as well to summarise the main details of the model. 
+- The method `predict.BayesANT`, which can be used to annotate test DNA sequences.
+
+Additional functions included in the package are
+
+- `read.BayesANT.data`, which loads a set of DNA sequences saved in a `.fasta` file in the format accepted by the `BayesANT` function.
+- `read.BayesANT.testDNA`, useful to load test DNA sequences for prediction.
+- `add_novelty_to_test_data`, which relabels the true annotations in the test set to account for novelty.
+- `plot_accuracies`, which displays the calibration plot for the predicted annotations if the true test labels are available.
+
+In this tutorial, we show how to use BayesANT on a simulated reference library and a simulated set of test DNA sequences. Both files are accessible is `.fasta` format via the following code.
+
 ```{r}
 file.train <- system.file("data/trainDNA.fasta", package = "BayesANT")
 file.test <- system.file("data/testDNA.fasta", package = "BayesANT")
 ```
 
+# The algorithm
 
+**BayesANT** is short for BAYESiAn Nonparametric Taxonomic classifier and it is an off-the-shelf algorithm that annotates test DNA sequences probabilistically. The algorithm needs to be trained on a set of annotated DNA sequences up to a given taxonomic `rank`. When doing the classification, **BayesANT** accounts for both the taxa observed in training, and for the potential novel ones at every level of the taxonomy. It does so by adopting Pitman--Yor process priors [@Perman_1992] over each node in the taxonomic tree. DNA sequences, instead, are modelled by means of a multinomial kernel with Dirichlet priors. We discuss the details in the following. **Note:** *skip this section if you are solely interested in learning how to use the package.*  
+
+## The Pitman--Yor process
+The Pitman--Yor process [@Perman_1992] is a sequential allocation mechanism for species labels. In its urn scheme formulation, let $V_1,\ldots, V_n$ be a sequence of taxon assignments for the DNA sequences in the training library,  comprising of a total of $K_n = k$ distinct labels denoted as $V_1^*, \ldots, V_k^*$ and appearing with frequencies $n_1, \ldots, n_k$. Then, the taxon of the $(n+1)$st observation is determined as
+
+$$
+(V_{n+1} \mid V_1, \ldots, V_n) = 
+\begin{cases}
+        V_j^*, & \text{with prob.} \quad (n_j - \sigma)/(\alpha + n), \ j = 1, \ldots, k\\
+        \text{''new''}, & \text{with prob.} \quad (\alpha + \sigma k)/(\alpha + n),
+\end{cases}
+$$
+where $\sigma \in [0,1)$ is a discount parameter governing the tail of the process and $\alpha > -\sigma$ is a precision parameter. High values for  $\alpha$ and $\sigma$ lead to a high number of distinct labels $K_n$. Moreover,  high values for $n_j$ lead to a high probability that taxon $V_j^*$ will be observed in the future. The figure below, borrowed from @Zito2022_BayesANT, shows a practical illustration when $\alpha = 1$ and $\sigma= 0.25$. 
 
 
 ![Example of a Pitman--Yor process with $n= 19$, $\alpha = 1$, $\sigma = 0.25$ and $K_n=4$. Taxa names are reported on top of the circles, and frequency of appearance are written on the right to the blue DNA sequences, respectively. Fractions in black denote the taxon probabilities for the orange DNA sequence. For example, the probability of observing the butterfly-shaped taxon $V_1^*$ is $(n_1 - \sigma)/(\alpha+n) = (10 - 0.25)/(19 + 1) = 39/80$. The probability for the unknown question mark taxon is $(\alpha + \sigma k)/(\alpha+n) = (1 + 4\times0.25)/(19 + 1) = 1/10$.](Pitman_Yor_UrnScheme.png){#id .class width=70% height=70%}
 
+Here, we aim at assigning a label to the 20th DNA sequence appearing in the data, conditioanl on the fact that we have observed 4 different taxa already. Parameters $\alpha$ and $\sigma$ are estimated from the data via maximization of the *exchangeable partition probability function* [@DeBlasi_2015]. See the supplement in @Zito2022_BayesANT for explicit details.
+
+## Prior probabilities
+BayesANT extends the Pitman--Yor process described above to every level in the taxonomic tree. In particular, consider a taxonomic library $\mathcal{D}_n = (\mathbf{V}_i,\mathbf{X}_i )_{i=1}^n$ of size $n$ and of $L\geq 2$ levels, where $\mathbf{V}_i = (V_{i, \ell})_{\ell =1}^L$ are the taxonomic annotations for DNA sequence $\mathbf{X}_i$. Following the notation in @Zito2022_BayesANT, let  $V_{j, \ell}^*$ be the $j$th taxon and $\mathbf{V}_{\cdot, \ell}^{(n)} = (V_{i, \ell})_{i =1}^n$  be the sequence of taxa observed for level $\ell$. 
+
+The first step is to construct the taxonomic tree. For a generic taxon $v_\ell\in \mathcal{V}_\ell$ at level $\ell$, where $\mathcal{V}_\ell$ is the space of taxa at $\ell$, define $\textrm{pa}(v_\ell)$ as the unique parent node of $v_\ell$ at level $\ell -1$ and $\rho_n(v_\ell)$ as the set of nodes $v_{\ell+1}$ at level $\ell+1$ such that $\textrm{pa}(v_{\ell+1}) = v_\ell$. We also let $K_n(v_\ell) = |\rho_n(v_\ell)|$ be the number of nodes linked to $v_\ell$ at level $\ell + 1$ and $N_n(v_\ell)$ be the size of the taxon, namely the number of DNA sequences linked to $v_\ell$. The prior prediction scheme becomes 
+$$
+(V_{n+1, \ell} \mid V_{n+1, \ell-1} = v_{\ell-1}, \mathbf{V}_{\cdot, \ell}^{(n)}) = 
+\begin{cases}
+        V_{j, \ell}^*, &\text{with prob.} \quad \big(N_n(V_{j, \ell}^*) - \sigma_\ell \big)/\big(\alpha_\ell + N_n(v_{\ell-1})\big), \\
+        \text{''new''}, & \text{with prob.} \quad \big(\alpha_\ell + \sigma_\ell K_n(v_{\ell-1})\big)/\big(\alpha_\ell + N_n(v_{\ell-1})\big),
+\end{cases}
+$$
+for all $j$ such that $\textrm{pa}(V_{j, \ell}^*) = v_{\ell -1}$ and 
+where $\sigma_\ell \in [0,1)$ and $\alpha_\ell > -\sigma_\ell$ are rank-specific parameters. Parameters $\alpha_\ell,\sigma_\ell$ are level-specific and allow for borrowing of information across branches.
+The figure below shows an example of a taxonomic tree divided into 3 levels (*Phylum*, *Class* and *Order*) and for which there are a total of $n=28$ DNA sequences divided into 2 taxa at the first level, 5 at the second and 8 at the third.  Under the assumption that a new node at level $\ell$ automatically creates a new node at all levels $\ell + 1, \ldots, L$ below, the total number of new leaves in this taxonomy is 8: one for every node at level 1 (2), one for every node at level 2 (5) and one entirely new (the branch with the ant-shaped symbol).
 
 ![<left> Example of a three-level taxonomic library. The total sample size of this example is $n =28$. Circles in blue indicate nodes linked to leafs with observed DNA sequences, while circles in gray show all the possible missing or undiscovered branches. <left>](Taxonomic_tree.png)
 
+The final prior probability for the $n+1$th DNA sequence is then product of Pitman--Yor probabilties, namely
+$$
+\begin{split}
+       \pi_{n+1}(v_L) &=  \text{pr}(V_{n+1, L} 
+       = v_L \mid \mathcal{D}_n) \\
+       &= \text{pr}(V_{n+1, 1} = v_1 \mid \mathbf{V}_{\cdot, 1}^{(n)})\times \prod_{\ell=2}^{L} \text{pr}(V_{n+1, \ell}=v_{\ell}\mid V_{n+1, \ell-1}=v_{\ell-1}, \mathbf{V}_{\cdot, \ell}^{(n)}).
+\end{split}
+$$
 
+## Posterior probabilities
+Once prior probabilities $\pi_{n+1}(v_L)$ are determined, BayesANT specifies the posterior prediction probabilities by means of a multinomial kernel. In particular, we let
+$$
+(\mathbf{X}_i \mid V_{i, L} = v_L, \boldsymbol{\theta}_{v_L}) \stackrel{\text{iid}}{\sim}\mathcal{K}(\mathbf{X}_i; \boldsymbol{\theta}_{v_L}),
+$$
+where $\mathcal{K}(\cdot, \boldsymbol{\theta}_{v_L})$ is a distribution that depends on the leaf-specific vector of parameters $\boldsymbol{\theta}_{v_L}$. Depending on the DNA sequences in training, BayesANT can take on two types of kernel
+
+- If the sequences are `aligned` and each is of length $p$, we have a product-multinomial kernel, i.e. 
+$$
+\mathcal{K}(\mathbf{X}_i; \boldsymbol{\theta}_{v}) = \prod_{s=1}^p\prod_{g\in \mathcal{N}_1} \theta_{v, s,g}^{\mathbf{1}\{X_{i,s} = g\}}, 
+$$
+where $\theta_{v,s,g}$ is the probability that nucleotide $g \in \mathcal{N}_1 = \{A,C,G,T\}$ is observed at location $s = 1, \ldots, p$ for taxon $v$. If we further assume a conjugate Dirichlet prior over each parameter, namely
+$$\boldsymbol{\theta}_{v,s} \sim Dirichlet(\xi_{v,s,\text{A}}, \xi_{v,s,\text{C}}, \xi_{v,s,\text{G}}, \xi_{v,s,\text{T}})$$
+with $\boldsymbol{\xi}_{v,s} = (\xi_{v,s,\text{A}}, \xi_{v,s,\text{C}}, \xi_{v,s,\text{G}}, \xi_{v,s,\text{T}})^\top$ being a vector of  hyperparameters, the posterior distribution becomes
+$$
+p(\boldsymbol{\theta}_v \mid \mathcal{D}_n)  \propto \prod_{s=1}^p \prod_{g\in \mathcal{N}_1} \theta_{v, s,g}^{\xi_{v,s,g} + n_{v,s,g}}.
+$$
+where $n_{v,s,g} = \sum_{i: V_{i, L} = v} \mathbf{1}\{X_{i,s} = g\}$ indicates the number of times nucleotide $g \in \mathcal{N}_1$ is recorded at locus $s$ for the DNA sequences linked to leaf $v$.
+
+- If the sequences are `not aligned`, we  specify a multinomial kernel over the $\kappa$-mer decomposition of the sequence, i.e. 
+$$
+\mathcal{K}(\mathbf{X}_i; \boldsymbol{\theta}_{v}) = \prod_{g=1}^{4^\kappa} \theta_{v, g}^{n_{i,g}}
+$$
+where $n_{i,g}$ is the totol number of times $\kappa$-mer $g$ appeares in the sequence $\boldsymbol{X}_i$. Under a Dirichlet prior similar to the one above, the prosterior distribution is again a Dirichlet. 
+
+
+Irrespective of the kernel chosen, the prediction probability detailed by BayesANT are computed as 
+
+$$
+p_{n+1}(v_L)  \propto \pi_{n+1}(v_L) \int \mathcal{K}(\mathbf{X}_{n+1}; \boldsymbol{\theta}_{v_L}) p(\boldsymbol{\theta}_{v_L}\mid \mathcal{D}_n)\mathrm{d}\boldsymbol{\theta}_{v_L}, 
+$$
+where $p_{n+1}(v_L) = \text{pr}(V_{n+1, L} = v_L \mid \mathbf{X}_{n+1}, \mathcal{D}_n)$ iand $v_L$ is a generic leaf in the taxonomic tree. If $v_L$ is an unobserved leaf, we replace the posterior $p(\boldsymbol{\theta}_{v_L}\mid \mathcal{D}_n)$ with a prior $p(\boldsymbol{\theta}_{v_L})$ setting th nucleotide counts to 0. In the aligned case, for example the prediction rule is
+
+$$
+p_{n+1}(v_L) \propto 
+    \begin{cases}
+    \pi_{n+1}(v_L) \prod_{s=1}^p (\xi_{v_L,s, g_s} + n_{v_L,s,g_{s}})/M_{v_L,s}, & \textrm{if } v_L \textrm{ is an observed leaf} \\
+    \pi_{n+1}(v_L) \prod_{s=1}^p \xi_{v_L,s, g_s}/\xi_{v,s,0} , & \textrm{if } v_L \textrm{ is a novel leaf}
+    \end{cases}
+$$
+where $M_{v,s} =\sum_{g \in \mathcal{N}_1} (\xi_{v,s,g} + n_{v,s,g})$ is a normalizing constant for the nucleotide probabilities and $\xi_{v,s,0} =\sum_{g \in \mathcal{N}_1} \xi_{v,s,g}$ is the sum of the hyperparameters at location $s$ for leaf $v$. These are tuned via method of the moments automatically, as detailed in the supplementary material in @Zito2022_BayesANT. 
+
+## Prediction rule
+Ones all the leaves posterior probabilities are defined, BayesANT annotates the DNA sequence $\mathbf{X}_{n+1}$ with the sequence of taxa $(v_\ell^*)_{\ell=1}^L$ that satisfy
+\begin{equation}\label{eq:PredictionRule}
+    v^*_\ell = {\arg\max}_{v_\ell \in \rho_n(v^*_{\ell-1})} \sum_{v_L \in \mathcal{L}_n(v_\ell)} p_{n+1}(v_L),
+\end{equation}
+where $\mathcal{L}_n(v_\ell)$ is the set of all leaves linked to node $v_\ell$ in a library of $n$ DNA sequences. 
+
+
+# The `BayesANT` module
+The taxonomic classifier described above is all implemented in the package. In what follows, we detail how train the classifier with the `BayesANT` module.
+
+## Step 1: load DNA sequences
+As a first step, we need to load the DNA sequences into the environment. The package is endowed with a set of training DNA sequences already, stored in `.fasta` file. We have chosen this format since it is the most used when working with DNA data. To see the file, run the following commands.
+```{r}
+# Find the link to the training file 
+file.train <- system.file("data/trainDNA.fasta", package = "BayesANT")
+# See how the data are stored
+readLines(file.train, n = 8)
+```
+The output above corresponds to the first DNA sequence in the file. The name of the sequence is `ID\_2`, and its annotation is `Root;V*-1,1;V*-1,2;V*-1,3;V*-1,4` and comprises of 4 taxonomic ranks. Here, `Root` is the root of the tree, and `V\*-1,1` is the node at the first taxonomic level. Names are given to mirro the notation above, since this is a simulated dataset. Notice that each annotation must start with the `Root`, and names must be separated with a semicolon `;`.  **Note:** *to work with BayesANT, all training DNA sequences must follow this nomenclature. Failure in doing so results in an incorrect use of the package*.
+
+To facilitate the correct use of this data for our package, we have created the function `read.BayesANT.data`, which returns an object of class `c('data.frame', 'BayesANT.data')`. 
+
+```{r}
+# Load training data 
+rank <- 4
+rank_names <- c("Phylum","Class", "Order", "Family")
+data <- read.BayesANT.data(fasta.file = file.train, 
+                           rank = rank, 
+                           rank_names = rank_names)
+# See some random observations
+set.seed(10)
+data[sample(nrow(data), size = 5), ]
+```
+
+When loading the data, one can specify the `rank` at which to load the sequences (default is the lowest observed), and the `rank.names` (default are `Level1` up to `Level4` in this case). The last column is `data$DNA`, and contains the DNA sequences in upper case and in string format. In this example, we have a set of $7500$ *aligned* sequences of length $p=400$, annotated across $4$ taxonomic levels. 
+
+```{r}
+# Access the length of the DNA sequences stores in the last column
+length_DNA <- stringr::str_length(data$DNA)
+quantile(length_DNA)
+```
+
+## Step 2: train the classifier
+Once the training library is correctly loaded, we are ready to train the classifier. We do this as follows:
+```{r, cache = T}
+## Train the classifier under the aligned kernel
+classifier <- BayesANT(data = data,
+                       typeseq = "aligned", 
+                       type_location = "single", 
+                       newtaxa = TRUE,
+                       verbose = TRUE)
+```
+
+The function `BayesANT` has the following fundamental arguments:
+
+- `data`: an object loaded with the function `read.BayesANT.data``
+- `typeseq`: type of sequences loaded in the classifier. Options are `aligned` and `not aligned`. This parameters determines the type of multinomial kernel to use
+- `type_location`: what type of `aligned` kernel to use. Options are `single` for the standard multinomial kernel over nucleotides ACGT, and `pairs` for a multinomial kernel over the nucleotide pairs AA, AC, AG...
+- `kmers`: $\kappa$-mer length for the `not aligned` kernel. Recommendable only if sequences are effectively not aligned.
+- `newtaxa`: logical. Whether to include new taxa in the training of the algorithm. If `FALSE`, it ignores the Pitman--Yor prior and classifier only by looking at the taxa observed in training.
+- `verbose`: if `TRUE`, monitor the progress of the training step.  
+
+In this tutorial, we use the case of the `aligned` set of sequences since our train data are all of the same length. The not aligned version follows easily by setting `typeseq = not aligned` and `kmers = 6` (or any desired number in the decomposition).
+
+To summarise the output of a classifier, run:
+```{r}
+# Summary of the classifier
+summary(classifier)
+```
+Here, we report the details of the taxonomic tree and the estimated level-specific prior parameters $\alpha_\ell$ and $\sigma_\ell$. 
+
+# Prediction
+
+```{r, cache = T}
+## Predict the taxonomic annotations of test DNA sequences
+
+# Step 1. Load the test sequences
+file.test <- system.file("data/testDNA.fasta", package = "BayesANT")
+testDNA <- read.BayesANT.testDNA(file.test)
+testDNA[1]
+
+# Predict
+out <- predict(classifier, DNA = testDNA, rho = 0.1, verbose = T)
+head(out)
+```
+
+
+# Accuracies and calibration
+
+```{r, cache = T, fig.align='center', fig.height=4, fig.width=5}
+# Load the test data
+test_data <- read.BayesANT.data(file.test)
+# Include novelty in the test data for correct labelling
+test_data <- add_novelty_to_test_data(data = data, test_data = test_data)
+# Print the classification accuracy
+plot_accuracies(prediction = out, test_data = test_data)
+```
 
 
 

@@ -41,7 +41,7 @@ summary.BayesANT <- function(object, ...){
   }
 
   # Print now the final message
-  cat(paste("BayesANT model", paste(rep(xml2::xml_text(xml2::read_html(paste0("<x>", "&#128028;", "</x>"))), 4), collapse = "")),
+  cat(paste("BayesANT classifier", paste(rep(xml2::xml_text(xml2::read_html(paste0("<x>", "&#128028;", "</x>"))), 4), collapse = "")),
       paste0("\nNumber of DNA sequences in the library: ", nrow(object$data)),
       paste0("Type of sequences: ", object$typeseq),
       paste0("Average length: ", lDNA),

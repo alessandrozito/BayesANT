@@ -138,7 +138,7 @@ BayesANT <- function(data,
   ##### STEP 4 - computing the hyperparameters
   # Use the method of the moments to extract the hyperpparameters
   if (verbose == TRUE) {
-    cat("Computing hyperparameters: Now. \n")
+    cat("Tuning hyperparameters: Now. \n")
   }
 
   if (typeseq == "aligned") {
@@ -146,9 +146,7 @@ BayesANT <- function(data,
       tree = Priorprobs[, 1:lowest_level],
       Nucl_counts = Nucl_counts, verbose = verbose
     )
-    if (verbose == TRUE) {
-      cat("Computing hyperparameters: Done. \n")
-    }
+
   } else if (typeseq == "not aligned") {
     hyperparameters <- tune_hyperparameters_MultKmers(
       tree = Priorprobs[, 1:lowest_level],
@@ -158,7 +156,7 @@ BayesANT <- function(data,
   }
 
   if (verbose == TRUE) {
-    cat("Computing hyperparameters: Done. \n")
+    cat("Tuning hyperparameters: Done. \n")
   }
 
 
