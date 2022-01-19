@@ -137,11 +137,17 @@ $$
 where $M_{v,s} =\sum_{g \in \mathcal{N}_1} (\xi_{v,s,g} + n_{v,s,g})$ is a normalizing constant for the nucleotide probabilities and $\xi_{v,s,0} =\sum_{g \in \mathcal{N}_1} \xi_{v,s,g}$ is the sum of the hyperparameters at location $s$ for leaf $v$. These are tuned via method of the moments automatically, as detailed in the supplementary material in @Zito2022_BayesANT. 
 
 ## Prediction rule
-Ones all the leaves posterior probabilities are defined, BayesANT annotates the DNA sequence $\mathbf{X}_{n+1}$ with the sequence of taxa $(v_\ell^*)_{\ell=1}^L$ that satisfy
+Once all the posterior probabilities are defined for all leaves, BayesANT annotates the DNA sequence $\mathbf{X}_{n+1}$ with the labels $(v_\ell^*)_{\ell=1}^L$ that satisfy
 \begin{equation}\label{eq:PredictionRule}
     v^*_\ell = {\arg\max}_{v_\ell \in \rho_n(v^*_{\ell-1})} \sum_{v_L \in \mathcal{L}_n(v_\ell)} p_{n+1}(v_L),
 \end{equation}
-where $\mathcal{L}_n(v_\ell)$ is the set of all leaves linked to node $v_\ell$ in a library of $n$ DNA sequences. 
+where $\mathcal{L}_n(v_\ell)$ is the set of all leaves linked to node $v_\ell$ in a library of $n$ DNA sequences. As we detail below, in the package we also allow the option to return not only the most likely taxon, but the leaves with the highest probabilities.
+
+When specifying the prediction probabilities, BayesANT introduces an additional parameter, $\rho \in (0,1]$, which can be tuned to recalibrate the output. In particular, In particular, we post-process the prediction probabilities $p_{n+1}(v_L)$ as
+$$
+    \tilde{p}_{n+1}(v_L) = \frac{p_{n+1}(v_L)^\rho}{\sum_{v \in \mathcal{V}_L} p_{n+1}(v_L)^\rho},
+$$
+which are later used in our prediction algorithm. Such a strategy does not alter the ranking of the original probabilities since the transformation is monotonic. Moreover, if $p_{n+1}(v_L)=1$, then also $\tilde{p}_{n+1}(v_L)=1$, implying that the overall accuracy is barely modified. Choices for $\rho$ can be adopted via cross validation. In particular, prediction probabilities are calibrated if the average probability for the predicted nodes is equal to the classification accuracy. For example, if 90\% of the sequences are correctly classified, ideally the average classification probability is approximately 0.9. An average value of 0.5 and of 0.99, instead, means that the algorithm is too conservative when right and too confident when wrong, respectively. The default value of  $\rho = 0.1$ works well in practice, but it is recommendable to use it carefully when classifying.
 
 
 # The `BayesANT` module
@@ -179,9 +185,26 @@ length_DNA <- stringr::str_length(data$DNA)
 quantile(length_DNA)
 ```
 
+One useful tool to evaluate the sequences in the library is to look at the location-specific Gini index (a measure for heterogeneity). We plot it with the following functions:
+
+```{r, fig.align='center', fig.height=5, fig.width=7}
+## Function to compute the Gini index
+Gini <- function(freq){
+  freq_rel <- freq / sum(freq)
+  1 - sum(freq_rel^2)
+}
+
+## Apply the function to all the sequences in the training data
+Gini_location <- apply(stringr::str_split(string = data$DNA, 
+                                          pattern = "", simplify = T), 2,function(x) Gini(table(x)))
+## Make the plot
+plot(Gini_location)
+```
+Here, we see that the first 25 loci in the aligned DNA sequences are a conserved region, since they are all equal across the library. The rest, instead, is quite heterogeneous.
+
 ## Step 2: train the classifier
 Once the training library is correctly loaded, we are ready to train the classifier. We do this as follows:
-```{r, cache = T}
+```{r, cache = F}
 ## Train the classifier under the aligned kernel
 classifier <- BayesANT(data = data,
                        typeseq = "aligned", 
@@ -190,16 +213,16 @@ classifier <- BayesANT(data = data,
                        verbose = TRUE)
 ```
 
-The function `BayesANT` has the following fundamental arguments:
+The function `BayesANT` has the following arguments:
 
-- `data`: an object loaded with the function `read.BayesANT.data``
-- `typeseq`: type of sequences loaded in the classifier. Options are `aligned` and `not aligned`. This parameters determines the type of multinomial kernel to use
+- `data`: an object loaded with the function `read.BayesANT.data`
+- `typeseq`: type of sequences loaded in the classifier. Options are `aligned` and `not aligned`. This parameters determines which type of multinomial kernel to use. Selecting `typeseq = 'aligned'` requires sequences to be all of the same length.
 - `type_location`: what type of `aligned` kernel to use. Options are `single` for the standard multinomial kernel over nucleotides ACGT, and `pairs` for a multinomial kernel over the nucleotide pairs AA, AC, AG...
-- `kmers`: $\kappa$-mer length for the `not aligned` kernel. Recommendable only if sequences are effectively not aligned.
-- `newtaxa`: logical. Whether to include new taxa in the training of the algorithm. If `FALSE`, it ignores the Pitman--Yor prior and classifier only by looking at the taxa observed in training.
+- `kmers`: $\kappa$-mer length for the `not aligned` kernel. Recommendable only if sequences are truly not aligned.
+- `newtaxa`: logical. Whether to include new taxa in the training of the algorithm. If `FALSE`, it ignores the Pitman--Yor prior and classifies only by looking at the taxa observed in training.
 - `verbose`: if `TRUE`, monitor the progress of the training step.  
 
-In this tutorial, we use the case of the `aligned` set of sequences since our train data are all of the same length. The not aligned version follows easily by setting `typeseq = not aligned` and `kmers = 6` (or any desired number in the decomposition).
+In this tutorial, we use the case of the `aligned` set of sequences since our train data are all of the same length. The not aligned version follows easily by setting `typeseq = not aligned` and `kmers = 6` (or any desired number).
 
 To summarise the output of a classifier, run:
 ```{r}
@@ -209,32 +232,101 @@ summary(classifier)
 Here, we report the details of the taxonomic tree and the estimated level-specific prior parameters $\alpha_\ell$ and $\sigma_\ell$. 
 
 # Prediction
-
-```{r, cache = T}
-## Predict the taxonomic annotations of test DNA sequences
-
-# Step 1. Load the test sequences
+Once the classifier has been trained, we are ready to annotate the test query sequences. The package is endowed with test sequences as well, generated from a similar process as the training ones. We load them with the function `read.BayesANT.testDNA` as follows:
+```{r}
+# Load the test sequences
 file.test <- system.file("data/testDNA.fasta", package = "BayesANT")
 testDNA <- read.BayesANT.testDNA(file.test)
 testDNA[1]
+```
 
-# Predict
+This function loads the DNA sequences saved in `.fasta` file as a named vector of strings. Then, to annotate the sequence we use the standard `predict` method:
+```{r}
+# Annotate a test sequence
+annot <- predict(classifier, 
+                 DNA = testDNA[1], 
+                 rho = 0.1, 
+                 return_probs = TRUE, 
+                 n_top_taxa = 5, 
+                 cores = 1)
+```
+
+The function `predict.BayesANT` has the following arguments:
+
+- `object`: a object of class `BayesANT`, i.e the output of a BayesANT classifier
+- `DNA`: a named vector of DNA strings, possibly loaded with the function `read.BayesANT.testDNA`
+- `rho`: temperature parameter to calibrate the probabilities. Default is `rho=0.1`
+- `return_probs`: whether to return the highest leaf probabilities
+- `n_top_taxa`: number of leaves to return. Valid if `return_probs=TRUE`
+- `cores`: Number of cores to run the prediction in parallel, implemented via the packages `foreach` and `doParallel`. Default is `cores=1` which is equivalent to a for loop.
+
+When we specify `return_probs=TRUE`, the package returns the following:
+```{r}
+## Predicted annotation for testDNA[1]
+annot$prediction
+## First 5 leaves with the highest probability
+annot$top_n_probs
+```
+
+Notice that using an aligned kernel requires that the training library and the test library should be aligned with the same algorithm and should have the same length. 
+
+Before predicting the whole test set. Let's look at one additional example. To verify if BayesANT reasonably recognizes novelty,
+we create two mock DNA sequences with a totally different generating process from the ones observed in the data. If BayesANT works correctly, they should all identify a new branch at the first level. 
+```{r}
+## Extract the conserved region
+set.seed(42)
+region <- substr(data$DNA[1],1, 25)
+mockDNA <- rep(0, 3)
+## Generate a mock query at random
+mockDNA[1] <- paste(sample(size = 400, x = c("A", "C", "G", "T"), replace = T), 
+                    collapse="")
+## Generate a mock query by repeating ACGT continuously
+mockDNA[2] <- paste(rep("ACGT", 100), collapse = "")
+## Generate a mock query by copying the conserved region and add one nucleotide
+mockDNA[3] <- paste0(region, paste(rep("C", 375), collapse = ""))
+## Generate a mock query by copying the conserved region and applying randomness
+mockDNA[4] <- paste0(region, paste(sample(size = 375, x = c("A", "C", "G", "T"), 
+                                          replace = T), collapse=""))
+## Assign names
+names(mockDNA) <- c("random", "ACGT", "region_C", "region_Random")
+## Annotate it
+predict(classifier, mockDNA)
+```
+
+In all these cases, the algorithm is still able to predict the Phylum novelty with high probability.
+
+With this in mind, we are ready to predict the full test set:
+```{r, cache = T}
+# Predict the whole test set
 out <- predict(classifier, DNA = testDNA, rho = 0.1, verbose = T)
 head(out)
 ```
 
+We evaluate the performance of the classifier in the next section. 
 
 # Accuracies and calibration
+When evaluating the performance of a taxonomic classifier, it is necessary to distinguish between which true test labels are observed in training, and which ones are new. If the annotations of the test sequences are known, BayesANT provides a function, called `add_novelty_to_test_data`, that relabels observations if their labels do not appear in the test set. For a given query sequence, the relabeling works as follows:
 
-```{r, cache = T, fig.align='center', fig.height=4, fig.width=5}
+- If all true taxa are all observed in training, do nothing
+- If the there is a new taxon unobserved at some level, this is substituted with `'name_of_last_observed_taxon' + 'name_of_level_where_novelty_appears' + 'new'`. For example, if a new *Family* is detected within the *Order* of *Lepidoptera*, its name will be
+`Lepidoptera_Family_new` for the Family level up until the last in the taxonomy. The name of a new taxon at level one in this case is `Phylum_new`.
+
+
+Identifying new leaves is useful to evaluate the accuracy of the classifier. To do this, run the following commands:
+```{r, fig.align='center', fig.height=4, fig.width=5}
 # Load the test data
-test_data <- read.BayesANT.data(file.test)
+test_data <- read.BayesANT.data(file.test, rank_names = rank_names)
 # Include novelty in the test data for correct labelling
 test_data <- add_novelty_to_test_data(data = data, test_data = test_data)
+# Which ones are new?
+id_new <- grepl("_new$", test_data$Level4)
 # Print the classification accuracy
 plot_accuracies(prediction = out, test_data = test_data)
 ```
 
+The resulting plot depicts how calibrated the probabilities are. Values close to the diagonal line indicate perfect calibration. If the algorithm shows miscalibration, consider adjusting the parameter `rho` when predicting. This can be done visually by plotting the output accuracies, or more formally via cross validation. 
 
 
+
+# References
 

@@ -32,8 +32,8 @@ predict_Taxonomy_not_alinged <- function(s, k, rho, ParameterMatrix, Priorprobs,
   } else {
     depth <- (ncol(Priorprobs) - 2) / 2
     data_probs <- Priorprobs[, 1:depth]
-    data_probs$leaf_prob <- predProbs
-    data_probs <- data_probs[order(data_probs$leaf_prob)]
+    data_probs$leaf_prob <- predProbs / sum(predProbs)
+    data_probs <- data_probs[order(data_probs$leaf_prob, decreasing = T),]
     return(list(
       "prediction" = out,
       "n_top_taxa" = utils::head(data_probs, n_top_taxa)

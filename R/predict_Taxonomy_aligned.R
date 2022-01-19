@@ -29,8 +29,8 @@ predict_Taxonomy_aligned <- function(s, rho, ParameterMatrix, Priorprobs, nucl,
   } else {
     depth <- (ncol(Priorprobs) - 2) / 2
     data_probs <- Priorprobs[, 1:depth]
-    data_probs$leaf_prob <- predicted_probs
-    data_probs <- data_probs[order(data_probs$leaf_prob)]
+    data_probs$leaf_prob <- predicted_probs / sum(predicted_probs)
+    data_probs <- data_probs[order(data_probs$leaf_prob, decreasing = T),]
 
     return(list(
       "prediction" = out,
