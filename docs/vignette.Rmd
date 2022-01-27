@@ -145,7 +145,7 @@ where $\mathcal{L}_n(v_\ell)$ is the set of all leaves linked to node $v_\ell$ i
 
 When specifying the prediction probabilities, BayesANT introduces an additional parameter, $\rho \in (0,1]$, which can be tuned to recalibrate the output. In particular, In particular, we post-process the prediction probabilities $p_{n+1}(v_L)$ as
 $$
-    \tilde{p}_{n+1}(v_L) = \frac{p_{n+1}(v_L)^\rho}{\sum_{v \in \mathcal{V}_L} p_{n+1}(v_L)^\rho},
+    \tilde{p}_{n+1}(v_L) = \frac{p_{n+1}(v_L)^\rho}{\sum_{v \in \mathcal{V}_L} p_{n+1}(v)^\rho},
 $$
 which are later used in our prediction algorithm. Such a strategy does not alter the ranking of the original probabilities since the transformation is monotonic. Moreover, if $p_{n+1}(v_L)=1$, then also $\tilde{p}_{n+1}(v_L)=1$, implying that the overall accuracy is barely modified. Choices for $\rho$ can be adopted via cross validation. In particular, prediction probabilities are calibrated if the average probability for the predicted nodes is equal to the classification accuracy. For example, if 90\% of the sequences are correctly classified, ideally the average classification probability is approximately 0.9. An average value of 0.5 and of 0.99, instead, means that the algorithm is too conservative when right and too confident when wrong, respectively. The default value of  $\rho = 0.1$ works well in practice, but it is recommendable to use it carefully when classifying.
 
