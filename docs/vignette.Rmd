@@ -326,7 +326,8 @@ plot_accuracies(prediction = out, test_data = test_data)
 
 The resulting plot depicts how calibrated the probabilities are. Values close to the diagonal line indicate perfect calibration. If the algorithm shows miscalibration, consider adjusting the parameter `rho` when predicting. This can be done visually by plotting the output accuracies, or more formally via cross validation. 
 
-
+# Acknowledgements
+The build up of this package and the research have been funded by the [LIFEPLAN project](https://www2.helsinki.fi/en/projects/lifeplan) (European Union’s Horizon 2020 research and innovation program - grant agreement No 856506).
 
 # References
 
