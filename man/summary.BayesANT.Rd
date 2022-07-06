@@ -2,18 +2,18 @@
 % Please edit documentation in R/summary.BayesANT.R
 \name{summary.BayesANT}
 \alias{summary.BayesANT}
-\title{Summary function for a model of class \code{BayesANT}}
+\title{Summary function for a model of class \code{BayesANT}.}
 \usage{
 \method{summary}{BayesANT}(object, ...)
 }
 \arguments{
-\item{object}{An object of class \code{BayesANT}}
+\item{object}{An object of class \code{BayesANT}.}
 
-\item{...}{Additional parameters}
+\item{...}{Additional parameters.}
 }
 \description{
-Summary function for a model of class \code{BayesANT}
+Summary function for a model of class \code{BayesANT}.
 }
 \details{
-A summary of the model details, including parameter estimation
+A summary of the model details, including parameter estimation.
 }

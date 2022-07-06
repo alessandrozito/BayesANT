@@ -4,10 +4,13 @@
 \alias{read.BayesANT.testDNA}
 \title{Load query DNA sequences to be used by the function \code{predict.BayesANT}}
 \usage{
-read.BayesANT.testDNA(fasta.file)
+read.BayesANT.testDNA(fasta.file, ...)
 }
 \arguments{
-\item{fasta.file}{File in \code{.fasta} or \code{.fas} format containing the DNA sequences.}
+\item{fasta.file}{File in \code{.fasta} or \code{.fas}
+format containing the DNA sequences.}
+
+\item{...}{Additional parameters.}
 }
 \value{
 A named vector of strings

@@ -1,26 +1,35 @@
-#' Function to import DNA sequences data in the format required by \code{BayesANT}
+#' Function to import DNA sequences data in the format required by
+#' \code{BayesANT}.
 #'
 #' @param fasta.file File in .fas or .fasta format containing the DNA sequences.
-#'                   The correct format for the annotation in the file should start with the ID of the sequence, followed by
+#'                   The correct format for the annotation in the file should
+#'                   start with the ID of the sequence, followed by
 #'                   a space and the word \code{Root;}. For example,
 #'                   \code{>COLFF973-13 Root;Arthropoda;Insecta;Coleoptera}
-#'                   is an annotation of 3 levels for the reference sequence with ID \code{COLFF973-13}
-#' @param rank       Numeric argument indicating the number of taxonomic ranks used to construct the library.
-#'                   Counting starts after the \code{Root;} in the annotation names.
-#'                   Default is \code{rank = NULL}, which automatically selects the lowest level in the loaded taxonomy (the maximum length of the annotations).
-#' @param rank_names Names for the taxonomic ranks, eg. "Class" or "Species". Default is \code{rank_names = NULL}, which automatically labels
-#'                   the selected ranks as \code{"Level1"} up to level \code{"Levelx"}, where \code{"x"} is the value of the parameter \code{rank}
+#'                   is an annotation of 3 levels for the reference sequence
+#'                   with ID \code{COLFF973-13}.
+#' @param rank       Numeric argument indicating the number of taxonomic ranks
+#'                   used to construct the library. Counting starts after the
+#'                   \code{Root;} in the annotation names. Default is
+#'                   \code{rank = NULL}, which automatically selects the lowest
+#'                   level in the loaded taxonomy (the maximum length of the
+#'                   annotations).
+#' @param rank_names Names for the taxonomic ranks, eg. "Class" or "Species".
+#'                   Default is \code{rank_names = NULL}, which automatically
+#'                   labels the selected ranks as \code{"Level1"} up to level
+#'                   \code{"Levelx"}, where \code{"x"} is the value of the
+#'                   parameter \code{rank}.
 #'
 #' @return An object of class \code{c("data.frame", "BayesANT.data")}
 #' @export
 read.BayesANT.data <- function(fasta.file, rank = NULL, rank_names = NULL) {
 
-  ## Step 1 - Load the data in fasta format with DNA sequences.
-  ## The automatic format in which they are loaded is a named list where DNA sequences are
-  ## loaded as strings and are capitalized.
+  # Load the data in fasta format with DNA sequences.
+  # The automatic format in which they are loaded is a named list where DNA
+  # sequences are loaded as strings and are capitalized.
   data_fasta <- seqinr::read.fasta(file = fasta.file, forceDNAtolower = F, as.string = T)
 
-  ## Step 2 - create the Taxonomic library
+  # Create the Taxonomic library
   annot <- lapply(data_fasta, function(x) attr(x, "Annot"))
   annot <- gsub(">", "", annot)
 
@@ -35,7 +44,8 @@ read.BayesANT.data <- function(fasta.file, rank = NULL, rank_names = NULL) {
 
   # Restrict to the rank desired
   if (is.null(rank)) {
-    ## Automatically select the lowest rank, which is the maximum length for the annotations.
+    # Automatically select the lowest rank, which is the maximum length for
+    # the annotations.
     lv <- ncol(taxa)
   } else {
     lv <- rank
@@ -52,7 +62,9 @@ read.BayesANT.data <- function(fasta.file, rank = NULL, rank_names = NULL) {
   colnames(taxa) <- rank_names[1:lv]
 
   # Step 3 - Create the BayesANT library
-  data <- data.frame(cbind(taxa, "DNA" = unlist(lapply(data_fasta, function(x) stringr::str_to_upper(x)))))
+  data <- data.frame(cbind(taxa, "DNA" = unlist(lapply(data_fasta, function(x) {
+    stringr::str_to_upper(x)
+  }))))
   class(data) <- c("data.frame", "BayesANT.data")
   return(data)
 }

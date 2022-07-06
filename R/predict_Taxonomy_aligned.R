@@ -16,7 +16,10 @@ predict_Taxonomy_aligned <- function(s, rho, ParameterMatrix, Priorprobs, nucl,
   sel <- build_CountMatrix(t(as.matrix(s)), nucl = nucl)
   # Compute the probabilities
   # browser()
-  predicted_probs <- c(compute_probs(M = ParameterMatrix, y = c(sel), priors = Priorprobs$prior_prob))^rho
+  predicted_probs <- c(compute_probs(
+    M = ParameterMatrix, y = c(sel),
+    priors = Priorprobs$prior_prob
+  ))^rho
 
   # Renormalize the probabilities
   Priorprobs$predicted_probs <- predicted_probs / sum(predicted_probs)
@@ -30,7 +33,7 @@ predict_Taxonomy_aligned <- function(s, rho, ParameterMatrix, Priorprobs, nucl,
     depth <- (ncol(Priorprobs) - 2) / 2
     data_probs <- Priorprobs[, 1:depth]
     data_probs$leaf_prob <- predicted_probs / sum(predicted_probs)
-    data_probs <- data_probs[order(data_probs$leaf_prob, decreasing = T),]
+    data_probs <- data_probs[order(data_probs$leaf_prob, decreasing = T), ]
 
     return(list(
       "prediction" = out,

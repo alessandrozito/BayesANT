@@ -1,22 +1,50 @@
 #' Predict the taxonomic annotation for query DNA sequences via a BayesANT model.
 #'
 #' @param object an object of class \code{BayesANT}
-#' @param rho Temperature parameter to re-calibrate the leaf probabilities. Default set to \code{rho = 0.1}.
-#' @param return_probs Whether to return the first \code{n_top_taxa} leafs with the highest probability probabilities. Default is \code{return_probs = FALSE}.
-#' @param n_top_taxa Number of leafs to return for the prediction. Default is \code{n_top_taxa = 5}. Valid only if \code{return_probs = TRUE}
-#' @param cores Optional. Specify the number of cores for predicting DNA sequences in parallel.
-#'               Relies on a combination of the packages \code{foreach} and \code{doParallel}.
-#'              Default is \code{cores = 1}, which corresponds to a standard \code{for} loop.
-#' @param verbose Monitor the state of the prediction.
+#' @param rho Temperature parameter to re-calibrate the leaf probabilities.
+#'            Default set to \code{rho = 0.1}.
+#' @param return_probs Whether to return the first \code{n_top_taxa} leafs with
+#'                     the highest probability probabilities. Default is
+#'                     \code{return_probs = FALSE}.
+#' @param n_top_taxa Number of leafs to return for the prediction. Default is
+#'                   \code{n_top_taxa = 5}. Valid only if
+#'                   \code{return_probs = TRUE}
+#' @param cores Optional. Specify the number of cores for predicting DNA
+#'              sequences in parallel. Relies on a combination of the packages
+#'              \code{foreach} and \code{doParallel}. Default is
+#'              \code{cores = 1}, which corresponds to a standard \code{for}
+#'              loop.
+#' @param verbose Monitor the number of sequences predicted.
 #' @param ... Additional parameters
-#' @param DNA DNA sequence to predict. Consider loading it with the function \code{read.BayesANT.testDNA}
+#' @param DNA DNA sequence to predict. Consider loading it with the function
+#'            \code{read.BayesANT.testDNA}
 #'
-#' @return An object of class \code{data.frame} or \code{list}
+#' @return An object of class \code{data.frame} or \code{list}.
 #' @importFrom foreach %dopar% foreach
 #' @export
-predict.BayesANT <- function(object, DNA, rho = 0.1, return_probs = FALSE, n_top_taxa = 5, cores = 1, verbose = TRUE, ...) {
+predict.BayesANT <- function(object,
+                             DNA,
+                             rho = 0.1,
+                             return_probs = FALSE,
+                             n_top_taxa = 5,
+                             cores = 1,
+                             verbose = TRUE,
+                             ...) {
 
-  ## Register the number of cores in DoParallel.
+  # Error messages.
+  stopifnot(
+    class(object) == "BayesANT",
+    class(DNA) == "BayesANT",
+    is.numeric(rho),
+    rho >= 0 & rho <= 1,
+    is.logical(return_probs),
+    is.logical(verbose),
+    is.numeric(cores),
+    is.numeric(n_top_taxa),
+    is.character(DNA)
+  )
+
+  ## Register the number of cores in doParallel.
   ## Default is cores = 1, which is equivalent to a standard for loop
   doParallel::registerDoParallel(cores)
 
@@ -30,21 +58,26 @@ predict.BayesANT <- function(object, DNA, rho = 0.1, return_probs = FALSE, n_top
   }
 
 
-  ## Begin prediction
+  # Begin prediction
   if (object$typeseq == "aligned") {
-    # Verify that the length of the DNA is equal to the length of the training sequences
+    # Verify that the length of the DNA is equal to the length of the
+    # training sequences
     length_DNA <- unique(stringr::str_length(DNA))
     if (length(length_DNA) != 1) {
-      stop("Query DNA sequences of different lengths are not allowed when typeseq = 'aligned' in the model.")
+      stop("Query DNA sequences of different lengths are not allowed when
+           typeseq = 'aligned' in the model.")
     }
     if (length_DNA != object$sequences_length) {
-      stop(cat("Query DNA sequences must be of length equal to ", object$sequences_length, "base pairs. \n"))
+      stop(cat(
+        "Query DNA sequences must be of length equal to ",
+        object$sequences_length, "base pairs. \n"
+      ))
     }
 
     i <- 1
     out <- foreach(i = seq_indexes) %dopar% {
 
-      ##  Print option valid only for cores = 1
+      #  Print option valid only for cores = 1
       if (i %% verbose_step == 0 & verbose == TRUE) {
         cat("Number of sequences predicted = ", i, "/", tot, " \n")
       }
@@ -81,15 +114,18 @@ predict.BayesANT <- function(object, DNA, rho = 0.1, return_probs = FALSE, n_top
 
   ##### Reformat the output
   if (return_probs == T) {
-    ## Create a separate data with the results, and a list containing the tor_n predictions
-    df_results <- data.frame(do.call("rbind", lapply(out, function(x) x$prediction)))
+    # Create a separate data with the results, and a list containing the
+    # n_top_taxa predictions
+    df_results <- data.frame(do.call("rbind", lapply(out, function(x) {
+      x$prediction
+    })))
     top_n_probs <- lapply(out, function(x) x$n_top_taxa)
     names(top_n_probs) <- names(DNA)
   } else {
     df_results <- data.frame(do.call("rbind", out))
   }
 
-  ## Best prediction dataset
+  # Best prediction dataset
   levels <- object$level_names
   colnames(df_results) <- c(levels, paste0("Prob_", levels))
   prob_cols <- which(grepl("Prob_", colnames(df_results)))

@@ -2,27 +2,37 @@
 % Please edit documentation in R/read.BayesANT.library.R
 \name{read.BayesANT.data}
 \alias{read.BayesANT.data}
-\title{Function to import DNA sequences data in the format required by \code{BayesANT}}
+\title{Function to import DNA sequences data in the format required by
+\code{BayesANT}.}
 \usage{
 read.BayesANT.data(fasta.file, rank = NULL, rank_names = NULL)
 }
 \arguments{
 \item{fasta.file}{File in .fas or .fasta format containing the DNA sequences.
-The correct format for the annotation in the file should start with the ID of the sequence, followed by
+The correct format for the annotation in the file should
+start with the ID of the sequence, followed by
 a space and the word \code{Root;}. For example,
 \code{>COLFF973-13 Root;Arthropoda;Insecta;Coleoptera}
-is an annotation of 3 levels for the reference sequence with ID \code{COLFF973-13}}
+is an annotation of 3 levels for the reference sequence
+with ID \code{COLFF973-13}.}
 
-\item{rank}{Numeric argument indicating the number of taxonomic ranks used to construct the library.
-Counting starts after the \code{Root;} in the annotation names.
-Default is \code{rank = NULL}, which automatically selects the lowest level in the loaded taxonomy (the maximum length of the annotations).}
+\item{rank}{Numeric argument indicating the number of taxonomic ranks
+used to construct the library. Counting starts after the
+\code{Root;} in the annotation names. Default is
+\code{rank = NULL}, which automatically selects the lowest
+level in the loaded taxonomy (the maximum length of the
+annotations).}
 
-\item{rank_names}{Names for the taxonomic ranks, eg. "Class" or "Species". Default is \code{rank_names = NULL}, which automatically labels
-the selected ranks as \code{"Level1"} up to level \code{"Levelx"}, where \code{"x"} is the value of the parameter \code{rank}}
+\item{rank_names}{Names for the taxonomic ranks, eg. "Class" or "Species".
+Default is \code{rank_names = NULL}, which automatically
+labels the selected ranks as \code{"Level1"} up to level
+\code{"Levelx"}, where \code{"x"} is the value of the
+parameter \code{rank}.}
 }
 \value{
 An object of class \code{c("data.frame", "BayesANT.data")}
 }
 \description{
-Function to import DNA sequences data in the format required by \code{BayesANT}
+Function to import DNA sequences data in the format required by
+\code{BayesANT}.
 }

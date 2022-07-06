@@ -2,16 +2,19 @@
 % Please edit documentation in R/plot_accuracies.R
 \name{plot_accuracies}
 \alias{plot_accuracies}
-\title{Calibration plot for the output of a BayesANT prediction}
+\title{Calibration plot for the output of a BayesANT prediction.}
 \usage{
 plot_accuracies(prediction, test_data)
 }
 \arguments{
-\item{prediction}{An object of class \code{data.frame} that is the output of the function \code{predict.BayesANT}}
+\item{prediction}{An object of class \code{data.frame} created with the
+function \code{predict.BayesANT}}
 
-\item{test_data}{An object of class \code{c('data.frame','BayesANT.data')} that contains the true taxonomic annotations.
-It is useful to process this first via the function \code{add_novelty_to_test_data}}
+\item{test_data}{An object of class \code{c('data.frame','BayesANT.data')}
+that contains the true taxonomic annotations.
+It is useful to process this first via the function
+\code{add_novelty_to_test_data}.}
 }
 \description{
-Calibration plot for the output of a BayesANT prediction
+Calibration plot for the output of a BayesANT prediction.
 }

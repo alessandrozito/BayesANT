@@ -2,7 +2,9 @@
 % Please edit documentation in R/BayesANT.R
 \name{BayesANT}
 \alias{BayesANT}
-\title{Call to the BayesANT Classifier.}
+\title{Main function to call the BayesANT (BAYESiAn Nonparametric Taxonomic)
+classifier. The function construct an object of class \code{'BayesANT'},
+which can be used for predictions.}
 \usage{
 BayesANT(
   data,
@@ -17,28 +19,76 @@ BayesANT(
 )
 }
 \arguments{
-\item{data}{An object of class \code{c('data.frame', 'BayesANT.data')}. Needs to be loaded with the function \code{read.BayesANT.data}.}
+\item{data}{An object of class \code{c('data.frame', 'BayesANT.data')}
+containing the training library. Needs to be loaded with the
+function \code{read.BayesANT.data}.}
 
-\item{typeseq}{Type of sequences used to train the classifier. Options are \code{'not aligned'} and \code{'aligned'}. Default is \code{typeseq = 'aligned'}}
+\item{typeseq}{Format of sequences used to train the classifier.
+Options are \code{'not aligned'} and \code{'aligned'}.
+Default is \code{typeseq = 'aligned'}. In this last case,
+the function returns an error if the sequences are not of the
+same length.}
 
-\item{type_location}{How to model the loci in an aligned set of DNA sequences. Valid only if \code{typeseq = 'aligned'}.
-Options are \code{'single'}, which refers to the single-location multinomial kernel, and  \code{'pairs'}, which is the 2-Product multinomial kernel. Default is \code{type_location = 'single'}}
+\item{type_location}{How to model the loci in an aligned set of DNA
+sequences. Valid only if \code{typeseq = 'aligned'}.
+Options are \code{'single'}, which refers to the
+single-location multinomial kernel, and  \code{'pairs'},
+which is the 2-mer multinomial kernel.  Default is
+\code{type_location = 'single'}}
 
-\item{kmers}{How many kmers to take for the k-mer decomposition. Valid only if \code{typeseq = 'not aligned'}. Default is  \code{kmers = 5}}
+\item{kmers}{Length of a substring under a k-mer decomposition.
+Valid only if \code{typeseq = 'not aligned'}.
+Default is  \code{kmers = 5}, which is also the recommended
+choice. The maximum choice allowed is \code{kmers = 8}}
 
-\item{newtaxa}{Include new taxa when constructing the classifier. Default is \code{newtaxa = TRUE}}
+\item{newtaxa}{Whether to account for new taxa when constructing the
+classifier. Default is \code{newtaxa = TRUE}. If
+\code{newtaxa = FALSE},no potential unobserved branches are
+included in the taxonomy.}
 
-\item{usegap}{Whether to include the alignment gap \code{"-"} among the nucleotides in the aligned multinomial kernel. Default is \code{usegap = FALSE}}
+\item{usegap}{Whether to include the alignment gap \code{"-"} among the
+nucleotides in the aligned multinomial kernel. Default is
+\code{usegap = FALSE}}
 
-\item{adjust_Kmer_length}{Adjust the likelihood contribution of a kmer decomposition based on its length. Valid for the option  \code{typeseq ='not aligned'}.}
+\item{adjust_Kmer_length}{Adjust the likelihood contribution of a k-mer
+decomposition based on its length.
+Valid for the option \code{typeseq ='not aligned'}.
+Default is \code{adjust_Kmer_length = TRUE}.}
 
-\item{save_nucl}{Save the nucleotide counts and the hyperparameters of the model in a list. Default is \code{save_nucl = FALSE}. Setting it to \code{TRUE} might severely increase the storage requirements, so be careful.}
+\item{save_nucl}{Save the nucleotide counts and the hyperparameters of
+the model in a list. Default is \code{save_nucl = FALSE}.
+Setting it to \code{TRUE} might be heavy to store, so use
+only if strictly needed.}
 
-\item{verbose}{Monitor the state of the algorithm. Default is \code{verbose = TRUE}}
+\item{verbose}{Monitor the steps adopted to train the algorithm.
+Default is \code{verbose = TRUE}.}
 }
 \value{
-An object of class \code{BayesANT}
+An object of class \code{BayesANT}. We return a \code{list}
+        containing the following quantities:
+        \describe{
+         \item{data}{Dataset used for training.},
+         \item{data_missing}{Dataset containing sequences with missing
+            annotations.}
+         \item{missing_taxa}{Indeces of the sequences with missing values.}
+         \item{typeseq}{Type of sequences used to train the classifier.}
+         \item{type_location}{Type of location to train the classifier.}
+         \item{newtaxa}{Whether new taxa are included in the classification.}
+         \item{level_names}{Names of taxonomic ranks}
+         \item{nucl}{Nucleotides detected.}
+         \item{kmers}{Number of kmers selected to build the classifier.}
+         \item{ParameterMatrix}{Matrix that stores model parameters.}
+         \item{Nucl_counts}{List of counts of the nucleotides at every leaf.}
+         \item{PYpars}{Estimated Pitman-yor parameters.}
+         \item{Priorprobs}{Prior probabilities selected for the model.}
+         \item{hyperparameters}{List of model hyperparameters.}
+         \item{leaves}{Name of the taxonomic leaves.}
+         \item{adjust_Kmer_length}{Wheter to adjust for sequence length.}
+         \item{sequences_length}{Length of each sequence in the data.}
+        }
 }
 \description{
-Call to the BayesANT Classifier.
+Main function to call the BayesANT (BAYESiAn Nonparametric Taxonomic)
+classifier. The function construct an object of class \code{'BayesANT'},
+which can be used for predictions.
 }
