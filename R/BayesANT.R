@@ -73,7 +73,7 @@ BayesANT <- function(data,
   # Check if parameters of the function as correctly specified.
   stopifnot(
     class(data) == c("data.frame", "BayesANT.data"),
-    typeseq %in% c("aligned", "not_aligned"),
+    typeseq %in% c("aligned", "not aligned"),
     type_location %in% c("single", "pairs"),
     kmers > 0 & kmers <= 8,
     is.logical(newtaxa),
