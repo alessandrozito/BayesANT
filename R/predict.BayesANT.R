@@ -34,7 +34,6 @@ predict.BayesANT <- function(object,
   # Error messages.
   stopifnot(
     class(object) == "BayesANT",
-    class(DNA) == "BayesANT",
     is.numeric(rho),
     rho >= 0 & rho <= 1,
     is.logical(return_probs),
