@@ -35,24 +35,24 @@ arma::vec compute_probs_MultKmers(const arma::mat& K, const arma::vec& priors,
   return logprobs_kmers/sum(logprobs_kmers);
 }
 
-// [[Rcpp::export]]
-arma::vec compute_probs_nucl_and_kmers(const arma::mat& M, const arma::mat& K ,
-                                       const arma::vec& y,const arma::rowvec& new_kmers,
-                                       const arma::vec& priors){
+//// [[Rcpp::export]]
+//arma::vec compute_probs_nucl_and_kmers(const arma::mat& M, const arma::mat& K ,
+//                                       const arma::vec& y,const arma::rowvec& new_kmers,
+//                                       const arma::vec& priors){
   // probabilities from the multinomial nucleotide model
-  arma::vec logprobs_nucl = sum(log(M.cols( arma::find(y == 1) )), 1);
+  //  arma::vec logprobs_nucl = sum(log(M.cols( arma::find(y == 1) )), 1);
   // probabilities from the kmer model
-  int n = logprobs_nucl.size();
-  arma::vec logprobs_kmers(size(logprobs_nucl));
+  //int n = logprobs_nucl.size();
+  //arma::vec logprobs_kmers(size(logprobs_nucl));
 
-  for(int i=0; i<n; i++){
-    logprobs_kmers(i) = log_MultKmers_cpp(K.row(i), new_kmers);
-  }
-  arma::vec logprobs = logprobs_nucl + logprobs_kmers + priors;
-  double m = max(logprobs);
-  arma::vec probs = exp(logprobs - m);
-  return probs/sum(probs);
-}
+  //for(int i=0; i<n; i++){
+  //  logprobs_kmers(i) = log_MultKmers_cpp(K.row(i), new_kmers);
+  //  }
+  //arma::vec logprobs = logprobs_nucl + logprobs_kmers + priors;
+  //double m = max(logprobs);
+  //arma::vec probs = exp(logprobs - m);
+  //return probs/sum(probs);
+  //}
 
 
 

@@ -67,7 +67,7 @@ BayesANT <- function(data,
                      kmers = 5,
                      newtaxa = TRUE,
                      usegap = FALSE,
-                     adjust_Kmer_length = TRUE,
+                     adjust_Kmer_length = FALSE,
                      save_nucl = FALSE,
                      verbose = TRUE) {
   # Check if parameters of the function as correctly specified.
@@ -114,7 +114,7 @@ BayesANT <- function(data,
     }
   }
 
-  # Extract the information
+  # Extract the DNA sequences
   lowest_level <- ncol(data) - 1 ## The last column in the data DNA sequences
   nodes <- data[, lowest_level]
   DNAseq <- data[, lowest_level + 1]

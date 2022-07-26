@@ -1,7 +1,7 @@
 Package: BayesANT
 Type: Package
 Title: Bayesian Nonparametric Taxonomic classifier
-Version: 0.1.0
+Version: 1.0
 Authors@R: 
   c(person(given = "Alessandro",
            family = "Zito",

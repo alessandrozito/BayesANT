@@ -13,7 +13,3 @@ compute_probs_MultKmers <- function(K, priors, new_kmers) {
     .Call('_BayesANT_compute_probs_MultKmers', PACKAGE = 'BayesANT', K, priors, new_kmers)
 }
 
-compute_probs_nucl_and_kmers <- function(M, K, y, new_kmers, priors) {
-    .Call('_BayesANT_compute_probs_nucl_and_kmers', PACKAGE = 'BayesANT', M, K, y, new_kmers, priors)
-}
-

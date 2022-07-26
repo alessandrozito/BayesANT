@@ -73,7 +73,7 @@ predict.BayesANT <- function(object,
       ))
     }
 
-    i <- 1
+
     out <- foreach(i = seq_indexes) %dopar% {
 
       #  Print option valid only for cores = 1
@@ -81,31 +81,36 @@ predict.BayesANT <- function(object,
         cat("Number of sequences predicted = ", i, "/", tot, " \n")
       }
       predict_Taxonomy_aligned(DNA[i],
-        rho = rho,
-        ParameterMatrix = object$ParameterMatrix,
-        Priorprobs = object$Priorprobs,
-        type_location = object$type_location,
-        nucl = object$nucl,
-        return_probs = return_probs,
-        n_top_taxa = n_top_taxa
+                               rho = rho,
+                               ParameterMatrix = object$ParameterMatrix,
+                               Priorprobs = object$Priorprobs,
+                               type_location = object$type_location,
+                               nucl = object$nucl,
+                               return_probs = return_probs,
+                               n_top_taxa = n_top_taxa
       )
     }
   } else if (object$typeseq == "not aligned") {
+    DNAmat <- stringr::str_split(DNA, "", simplify = TRUE)
+    DNAmat[!DNAmat %in% object$nucl] <- "-"
+
+    # Extract the Kmers relative to the sequence
+    Kmers <- kmer::kcount(x = ape::as.DNAbin(DNAmat), k = object$kmers)
+    # Predict
     out <- foreach(i = seq_indexes) %dopar% {
 
       ##  Print option valid only for cores = 1
       if (i %% verbose_step == 0 & verbose == TRUE) {
         cat("Number of sequences predicted = ", i, "/", tot, " \n")
       }
-      predict_Taxonomy_not_alinged(DNA[i],
-        k = object$kmers,
-        rho = rho,
-        ParameterMatrix = object$ParameterMatrix,
-        Priorprobs = object$Priorprobs,
-        adjust_Kmer_length = object$adjust_Kmer_length,
-        return_probs = return_probs,
-        n_top_taxa = n_top_taxa,
-        nucl = object$nucl
+      predict_Taxonomy_not_alinged(Kmers[i,],
+                                   rho = rho,
+                                   ParameterMatrix = object$ParameterMatrix,
+                                   Priorprobs = object$Priorprobs,
+                                   adjust_Kmer_length = object$adjust_Kmer_length,
+                                   return_probs = return_probs,
+                                   n_top_taxa = n_top_taxa,
+                                   nucl = object$nucl
       )
     }
   }

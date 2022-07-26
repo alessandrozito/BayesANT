@@ -49,27 +49,11 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// compute_probs_nucl_and_kmers
-arma::vec compute_probs_nucl_and_kmers(const arma::mat& M, const arma::mat& K, const arma::vec& y, const arma::rowvec& new_kmers, const arma::vec& priors);
-RcppExport SEXP _BayesANT_compute_probs_nucl_and_kmers(SEXP MSEXP, SEXP KSEXP, SEXP ySEXP, SEXP new_kmersSEXP, SEXP priorsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat& >::type M(MSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type K(KSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type y(ySEXP);
-    Rcpp::traits::input_parameter< const arma::rowvec& >::type new_kmers(new_kmersSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type priors(priorsSEXP);
-    rcpp_result_gen = Rcpp::wrap(compute_probs_nucl_and_kmers(M, K, y, new_kmers, priors));
-    return rcpp_result_gen;
-END_RCPP
-}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_BayesANT_compute_probs", (DL_FUNC) &_BayesANT_compute_probs, 3},
     {"_BayesANT_log_MultKmers_cpp", (DL_FUNC) &_BayesANT_log_MultKmers_cpp, 2},
     {"_BayesANT_compute_probs_MultKmers", (DL_FUNC) &_BayesANT_compute_probs_MultKmers, 3},
-    {"_BayesANT_compute_probs_nucl_and_kmers", (DL_FUNC) &_BayesANT_compute_probs_nucl_and_kmers, 5},
     {NULL, NULL, 0}
 };
 

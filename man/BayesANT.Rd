@@ -13,7 +13,7 @@ BayesANT(
   kmers = 5,
   newtaxa = TRUE,
   usegap = FALSE,
-  adjust_Kmer_length = TRUE,
+  adjust_Kmer_length = FALSE,
   save_nucl = FALSE,
   verbose = TRUE
 )
