@@ -35,9 +35,14 @@ predict_Taxonomy_aligned <- function(s, rho, ParameterMatrix, Priorprobs, nucl,
     data_probs$leaf_prob <- predicted_probs / sum(predicted_probs)
     data_probs <- data_probs[order(data_probs$leaf_prob, decreasing = T), ]
 
+  if (is.null(n_top_taxa)) {
+    returned_tree <- data_probs
+  } else {
+    returned_tree <- utils::head(data_probs, n_top_taxa)
+  }
     return(list(
       "prediction" = out,
-      "n_top_taxa" = utils::head(data_probs, n_top_taxa)
+      "n_top_taxa" = returned_tree
     ))
   }
 }

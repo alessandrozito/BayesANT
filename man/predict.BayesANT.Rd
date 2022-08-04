@@ -24,13 +24,13 @@
 \item{rho}{Temperature parameter to re-calibrate the leaf probabilities.
 Default set to \code{rho = 0.1}.}
 
-\item{return_probs}{Whether to return the first \code{n_top_taxa} leafs with
-the highest probability probabilities. Default is
+\item{return_probs}{Whether to return the first \code{n_top_taxa} leafs that have
+the highest probability. Default is
 \code{return_probs = FALSE}.}
 
 \item{n_top_taxa}{Number of leafs to return for the prediction. Default is
-\code{n_top_taxa = 5}. Valid only if
-\code{return_probs = TRUE}}
+\code{n_top_taxa = NULL}, which reports the full taxonomic tree.
+Valid only if \code{return_probs = TRUE}.}
 
 \item{cores}{Optional. Specify the number of cores for predicting DNA
 sequences in parallel. Relies on a combination of the packages

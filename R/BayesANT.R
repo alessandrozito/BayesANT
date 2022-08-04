@@ -31,16 +31,12 @@
 #'                  the model in a list. Default is \code{save_nucl = FALSE}.
 #'                  Setting it to \code{TRUE} might be heavy to store, so use
 #'                  only if strictly needed.
-#' @param adjust_Kmer_length Adjust the likelihood contribution of a k-mer
-#'                           decomposition based on its length.
-#'                           Valid for the option \code{typeseq ='not aligned'}.
-#'                           Default is \code{adjust_Kmer_length = TRUE}.
 #' @param verbose Monitor the steps adopted to train the algorithm.
 #'                Default is \code{verbose = TRUE}.
 #'
 #' @return An object of class \code{BayesANT}. We return a \code{list}
 #'         containing the following quantities:
-#'         \describe{
+#'         \itemize{
 #'          \item{data}{Dataset used for training.},
 #'          \item{data_missing}{Dataset containing sequences with missing
 #'             annotations.}
@@ -57,7 +53,6 @@
 #'          \item{Priorprobs}{Prior probabilities selected for the model.}
 #'          \item{hyperparameters}{List of model hyperparameters.}
 #'          \item{leaves}{Name of the taxonomic leaves.}
-#'          \item{adjust_Kmer_length}{Wheter to adjust for sequence length.}
 #'          \item{sequences_length}{Length of each sequence in the data.}
 #'         }
 #' @export
@@ -67,7 +62,6 @@ BayesANT <- function(data,
                      kmers = 5,
                      newtaxa = TRUE,
                      usegap = FALSE,
-                     adjust_Kmer_length = FALSE,
                      save_nucl = FALSE,
                      verbose = TRUE) {
   # Check if parameters of the function as correctly specified.
@@ -198,7 +192,7 @@ BayesANT <- function(data,
     }
     Nucl_counts <- get_Kmer_counts(
       k = kmers, nodes, DNAseq, nucl,
-      adjust_Kmer_length = adjust_Kmer_length
+      adjust_Kmer_length = FALSE
     )
     if (verbose) {
       cat("Extracting kmers from sequences: Done. \n")
@@ -275,7 +269,6 @@ BayesANT <- function(data,
     "Priorprobs" = Priorprobs,
     "hyperparameters" = hyperparameters,
     "leaves" = leaves,
-    "adjust_Kmer_length" = adjust_Kmer_length,
     "sequences_length" = seqs_length
   )
 

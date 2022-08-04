@@ -3,12 +3,12 @@
 #' @param object an object of class \code{BayesANT}
 #' @param rho Temperature parameter to re-calibrate the leaf probabilities.
 #'            Default set to \code{rho = 0.1}.
-#' @param return_probs Whether to return the first \code{n_top_taxa} leafs with
-#'                     the highest probability probabilities. Default is
+#' @param return_probs Whether to return the first \code{n_top_taxa} leafs that have
+#'                     the highest probability. Default is
 #'                     \code{return_probs = FALSE}.
 #' @param n_top_taxa Number of leafs to return for the prediction. Default is
-#'                   \code{n_top_taxa = 5}. Valid only if
-#'                   \code{return_probs = TRUE}
+#'                   \code{n_top_taxa = NULL}, which reports the full taxonomic tree.
+#'                   Valid only if \code{return_probs = TRUE}.
 #' @param cores Optional. Specify the number of cores for predicting DNA
 #'              sequences in parallel. Relies on a combination of the packages
 #'              \code{foreach} and \code{doParallel}. Default is
@@ -107,7 +107,7 @@ predict.BayesANT <- function(object,
                                    rho = rho,
                                    ParameterMatrix = object$ParameterMatrix,
                                    Priorprobs = object$Priorprobs,
-                                   adjust_Kmer_length = object$adjust_Kmer_length,
+                                   adjust_Kmer_length = FALSE,
                                    return_probs = return_probs,
                                    n_top_taxa = n_top_taxa,
                                    nucl = object$nucl
@@ -117,7 +117,7 @@ predict.BayesANT <- function(object,
 
 
   ##### Reformat the output
-  if (return_probs == T) {
+  if (return_probs) {
     # Create a separate data with the results, and a list containing the
     # n_top_taxa predictions
     df_results <- data.frame(do.call("rbind", lapply(out, function(x) {
@@ -136,7 +136,7 @@ predict.BayesANT <- function(object,
   df_results[, prob_cols] <- sapply(df_results[, prob_cols], as.numeric)
   rownames(df_results) <- names(DNA)
 
-  if (return_probs == T) {
+  if (return_probs) {
     return(list("prediction" = df_results, "top_n_probs" = top_n_probs))
   } else {
     return(df_results)

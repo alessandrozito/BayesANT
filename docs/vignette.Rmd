@@ -26,7 +26,7 @@ library(BayesANT)
 
 ## Package description
 [`BayesANT`](https://github.com/alessandrozito/BayesANT) is an R package that runs the Bayesian nonparametric taxonomic classifier described in @Zito2022_BayesANT The code is available at this [github repository](https://github.com/alessandrozito/BayesANT).
-In this tutorial we provide an overview of the functions in the package, and we briefly describe the algorithm. For explicit mathematical details and estimation method, see the Supplementary matherial in @Zito2022_BayesANT. 
+In this tutorial we provide an overview of the functions in the package, and we briefly describe the algorithm. For explicit mathematical details and estimation method, see the Supplementary material in @Zito2022_BayesANT. 
 
 The package is structured around two core methods:
 
@@ -43,8 +43,8 @@ Additional functions included in the package are
 In this tutorial, we show how to use BayesANT on a simulated reference library and a simulated set of test DNA sequences. Both files are accessible is `.fasta` format via the following code.
 
 ```{r}
-file.train <- system.file("data/trainDNA.fasta", package = "BayesANT")
-file.test <- system.file("data/testDNA.fasta", package = "BayesANT")
+file.train <- system.file("extdata/trainDNA.fasta", package = "BayesANT")
+file.test <- system.file("extdata/testDNA.fasta", package = "BayesANT")
 ```
 
 # The algorithm
@@ -157,7 +157,7 @@ The taxonomic classifier described above is all implemented in the package. In w
 As a first step, we need to load the DNA sequences into the environment. The package is endowed with a set of training DNA sequences already, stored in `.fasta` file. We have chosen this format since it is the most used when working with DNA data. To see the file, run the following commands.
 ```{r}
 # Find the link to the training file 
-file.train <- system.file("data/trainDNA.fasta", package = "BayesANT")
+file.train <- system.file("extdata/trainDNA.fasta", package = "BayesANT")
 # See how the data are stored
 readLines(file.train, n = 8)
 ```
@@ -235,7 +235,7 @@ Here, we report the details of the taxonomic tree and the estimated level-specif
 Once the classifier has been trained, we are ready to annotate the test query sequences. The package is endowed with test sequences as well, generated from a similar process as the training ones. We load them with the function `read.BayesANT.testDNA` as follows:
 ```{r}
 # Load the test sequences
-file.test <- system.file("data/testDNA.fasta", package = "BayesANT")
+file.test <- system.file("extdata/testDNA.fasta", package = "BayesANT")
 testDNA <- read.BayesANT.testDNA(file.test)
 testDNA[1]
 ```

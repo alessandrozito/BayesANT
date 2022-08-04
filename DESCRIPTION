@@ -18,13 +18,15 @@ Authors@R:
            email = "dunson@duke.edu",
            role = "ctb"))
 Maintainer: The package maintainer <alessandro.zito@duke.edu>
-Description: BayesANT is a package for the taxonomic classification (eg. Phylum, Class, Order, ...) 
-  of DNA sequences. It trains a taxonomic classifier on a dataset of barcodes and returns probabilistic 
-  predictions for query DNA sequences.
+Description: BayesANT is a package for the taxonomic classification 
+  of DNA sequences. It trains a taxonomic classifier on a dataset of DNA barcodes
+  and returns probabilistic predictions for query DNA sequences. BayesANT
+  explicitly accounts for potential taxonomic novelty of the query sequences by relying on 
+  Bayesian nonparametric species sampling priors to model the taxonomic tree. 
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.2.0
+RoxygenNote: 7.2.1
 Imports: magrittr, stringr, Rcpp (>= 1.0.5), RcppArmadillo(>= 0.10.1.2.0), seqinr, knitr, 
           kmer, dplyr, purrr, ggplot2, readr, progress, doParallel, foreach, stats, utils, ape, xml2
 LinkingTo: Rcpp, RcppArmadillo

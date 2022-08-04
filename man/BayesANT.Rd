@@ -13,7 +13,6 @@ BayesANT(
   kmers = 5,
   newtaxa = TRUE,
   usegap = FALSE,
-  adjust_Kmer_length = FALSE,
   save_nucl = FALSE,
   verbose = TRUE
 )
@@ -50,11 +49,6 @@ included in the taxonomy.}
 nucleotides in the aligned multinomial kernel. Default is
 \code{usegap = FALSE}}
 
-\item{adjust_Kmer_length}{Adjust the likelihood contribution of a k-mer
-decomposition based on its length.
-Valid for the option \code{typeseq ='not aligned'}.
-Default is \code{adjust_Kmer_length = TRUE}.}
-
 \item{save_nucl}{Save the nucleotide counts and the hyperparameters of
 the model in a list. Default is \code{save_nucl = FALSE}.
 Setting it to \code{TRUE} might be heavy to store, so use
@@ -66,7 +60,7 @@ Default is \code{verbose = TRUE}.}
 \value{
 An object of class \code{BayesANT}. We return a \code{list}
         containing the following quantities:
-        \describe{
+        \itemize{
          \item{data}{Dataset used for training.},
          \item{data_missing}{Dataset containing sequences with missing
             annotations.}
@@ -83,7 +77,6 @@ An object of class \code{BayesANT}. We return a \code{list}
          \item{Priorprobs}{Prior probabilities selected for the model.}
          \item{hyperparameters}{List of model hyperparameters.}
          \item{leaves}{Name of the taxonomic leaves.}
-         \item{adjust_Kmer_length}{Wheter to adjust for sequence length.}
          \item{sequences_length}{Length of each sequence in the data.}
         }
 }
