@@ -3,6 +3,7 @@
 S3method(predict,BayesANT)
 S3method(summary,BayesANT)
 export(BayesANT)
+export(BayesANT_amino)
 export(add_novelty_to_test_data)
 export(plot_accuracies)
 export(read.BayesANT.data)

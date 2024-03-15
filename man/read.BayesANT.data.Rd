@@ -5,7 +5,7 @@
 \title{Function to import DNA sequences data in the format required by
 \code{BayesANT}.}
 \usage{
-read.BayesANT.data(fasta.file, rank = NULL, rank_names = NULL)
+read.BayesANT.data(fasta.file, rank = NULL, rank_names = NULL, sep = ";")
 }
 \arguments{
 \item{fasta.file}{File in .fas or .fasta format containing the DNA sequences.
@@ -28,6 +28,9 @@ Default is \code{rank_names = NULL}, which automatically
 labels the selected ranks as \code{"Level1"} up to level
 \code{"Levelx"}, where \code{"x"} is the value of the
 parameter \code{rank}.}
+
+\item{sep}{Pattern in the fasta file to separate the rank. Ususally, we have ';', but
+consider also using \code{'\\s+|\\|'}}
 }
 \value{
 An object of class \code{c("data.frame", "BayesANT.data")}
