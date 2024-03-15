@@ -1,0 +1,39 @@
+---
+title: "Aminoacids"
+author: "Alessandro Zito"
+date: "2024-03-12"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(BayesANT)
+library(seqinr)
+```
+
+
+```{r}
+# Load aminoacid sequences
+fasta.file <- "~/Downloads/transfer_284506_files_d322bf12/train_finbol-gbol_genus.translated.fasta"
+df_train <- read.fasta(fasta.file)
+
+df_train <- read.BayesANT.data(fasta.file = fasta.file, sep = '\\s+|\\|')
+head(df_train)
+
+# Train model
+model <- BayesANT_amino(df_train, amino = TRUE)
+
+# Predict
+fasta.file_test <- "~/Downloads/transfer_284506_files_d322bf12/testshort_finbol-gbol_genus.translated.fasta"
+df_test <- read.BayesANT.data(fasta.file = fasta.file_test, sep = '\\s+|\\|')
+df_test <- add_novelty_to_test_data(df_train, df_test)
+testSeqs <- read.BayesANT.testDNA(fasta.file_test)
+
+nseqs <- 500
+pred <- predict(model, DNA = testSeqs[1:nseqs], rho = 0.25)
+
+plot_accuracies(prediction = pred, test_data = df_test[1:nseqs, ])
+
+
+```
+

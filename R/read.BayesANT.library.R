@@ -19,10 +19,11 @@
 #'                   labels the selected ranks as \code{"Level1"} up to level
 #'                   \code{"Levelx"}, where \code{"x"} is the value of the
 #'                   parameter \code{rank}.
-#'
+#' @param sep Pattern in the fasta file to separate the rank. Ususally, we have ';', but
+#'            consider also using \code{'\\s+|\\|'}
 #' @return An object of class \code{c("data.frame", "BayesANT.data")}
 #' @export
-read.BayesANT.data <- function(fasta.file, rank = NULL, rank_names = NULL) {
+read.BayesANT.data <- function(fasta.file, rank = NULL, rank_names = NULL, sep = ";") {
 
   # Load the data in fasta format with DNA sequences.
   # The automatic format in which they are loaded is a named list where DNA
@@ -37,7 +38,7 @@ read.BayesANT.data <- function(fasta.file, rank = NULL, rank_names = NULL) {
   IDs <- names(data_fasta)
 
   # Extract the taxonomy
-  taxa <- stringr::str_split(annot, pattern = ";", simplify = T)
+  taxa <- stringr::str_split(annot, pattern = sep, simplify = T)
 
   # Exclude the first row (which contains the Original Name and the Root)
   taxa <- taxa[, -1]
