@@ -40,3 +40,7 @@ vignettes/*.pdf
 
 # EXTRA folder
 EXTRA/
+
+# compiled object and shared objects
+src/*.o
+src/*.so
